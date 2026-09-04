@@ -85,6 +85,8 @@ graph TD
 - Multi-week consistency trend line chart.
 - Habit-by-habit performance comparison breakdown.
 - Month-by-month interactive calendar heatmap with intensity indicators.
+- **Dedicated Habit Monthly History Screen**: Full chronological calendar from habit inception with green (completed) and white (uncompleted) day tiles.
+
 
 ### 6. Settings & Data Management
 - Personal profile with editable display name.
