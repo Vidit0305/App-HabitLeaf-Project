@@ -90,4 +90,8 @@ class AppColors {
     Color(0xFF047857), // Deep Jade
     Color(0xFF34D399), // Mint Green
   ];
+
+  // Calendar Completion Indicators
+  static const Color calendarCompleted = Color(0xFF10B981);
+  static const Color calendarUncompleted = Color(0xFFFFFFFF);
 }
