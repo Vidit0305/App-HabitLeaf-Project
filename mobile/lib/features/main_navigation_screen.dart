@@ -4,10 +4,10 @@ import '../../app/theme/app_colors.dart';
 import '../../core/utils/haptic_feedback_helper.dart';
 import 'home/presentation/home_screen.dart';
 import 'habits/presentation/habits_screen.dart';
+import 'habits/presentation/add_edit_habit_modal.dart';
 import 'notifications/presentation/notifications_screen.dart';
 import 'notifications/controllers/notifications_controller.dart';
 import 'statistics/presentation/statistics_screen.dart';
-import 'settings/presentation/settings_screen.dart';
 
 class MainNavigationScreen extends ConsumerStatefulWidget {
   const MainNavigationScreen({super.key});
@@ -28,6 +28,16 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     }
   }
 
+  void _openAddHabitModal() {
+    HapticFeedbackHelper.medium();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => const AddEditHabitModal(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
@@ -38,7 +48,6 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
       const HabitsScreen(),
       const NotificationsScreen(),
       const StatisticsScreen(),
-      const SettingsScreen(),
     ];
 
     return Scaffold(
@@ -95,6 +104,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                   isSelected: _currentIndex == 1,
                   isDark: isDark,
                 ),
+                _buildCenterAddButton(isDark),
                 _buildNavItem(
                   index: 2,
                   label: 'Notifications',
@@ -112,16 +122,41 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                   isSelected: _currentIndex == 3,
                   isDark: isDark,
                 ),
-                _buildNavItem(
-                  index: 4,
-                  label: 'Settings',
-                  icon: Icons.tune_rounded,
-                  activeIcon: Icons.tune_rounded,
-                  isSelected: _currentIndex == 4,
-                  isDark: isDark,
-                ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCenterAddButton(bool isDark) {
+    return GestureDetector(
+      onTap: _openAddHabitModal,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF10B981), Color(0xFF059669)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF10B981).withOpacity(0.45),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.add_rounded,
+            color: Colors.white,
+            size: 28,
           ),
         ),
       ),

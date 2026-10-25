@@ -107,7 +107,7 @@ class _SplashScreenState extends State<SplashScreen>
                   children: [
                     const Spacer(flex: 3),
 
-                    // Brand Emblem
+                    // Brand Leaf Emblem
                     Transform.scale(
                       scale: _scaleAnimation.value,
                       child: Opacity(
@@ -116,45 +116,23 @@ class _SplashScreenState extends State<SplashScreen>
                           width: 140,
                           height: 140,
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFF10B981),
-                                Color(0xFF059669),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
+                            borderRadius: BorderRadius.circular(36),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF10B981).withOpacity(0.32),
+                                color: const Color(0xFF10B981).withOpacity(0.35),
                                 blurRadius: 28,
-                                offset: const Offset(0, 12),
+                                offset: const Offset(0, 10),
                                 spreadRadius: 2,
                               ),
                             ],
                           ),
-                          child: Center(
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Container(
-                                  width: 104,
-                                  height: 104,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.35),
-                                      width: 2.5,
-                                    ),
-                                  ),
-                                ),
-                                const Icon(
-                                  Icons.track_changes_rounded,
-                                  size: 64,
-                                  color: Colors.white,
-                                ),
-                              ],
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(36),
+                            child: Image.asset(
+                              'assets/images/leaf_logo.png',
+                              width: 140,
+                              height: 140,
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
@@ -167,9 +145,9 @@ class _SplashScreenState extends State<SplashScreen>
                     Opacity(
                       opacity: _fadeAnimation.value,
                       child: const Text(
-                        'HABIT TRACKER',
+                        'HABITLEAF',
                         style: TextStyle(
-                          fontSize: 28,
+                          fontSize: 30,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 2.5,
                           color: Color(0xFF0F172A),

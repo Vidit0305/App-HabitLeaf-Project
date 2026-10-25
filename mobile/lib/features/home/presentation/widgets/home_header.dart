@@ -3,16 +3,16 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/date_formatter.dart';
-import '../../../../core/utils/haptic_feedback_helper.dart';
+import '../../../../core/widgets/theme_toggle_button.dart';
 
 class HomeHeader extends StatelessWidget {
   final String displayName;
-  final VoidCallback onAddHabit;
+  final VoidCallback? onAddHabit;
 
   const HomeHeader({
     super.key,
     required this.displayName,
-    required this.onAddHabit,
+    this.onAddHabit,
   });
 
   @override
@@ -87,39 +87,8 @@ class HomeHeader extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: 12),
-        // Quick Add Habit Button with tactile vibration
-        Container(
-          decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primaryGreenAccent.withOpacity(0.35),
-                blurRadius: 12,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                HapticFeedbackHelper.light();
-                onAddHabit();
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: const Padding(
-                padding: EdgeInsets.all(13),
-                child: Icon(
-                  Icons.add_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-            ),
-          ),
-        ),
+        const SizedBox(width: 8),
+        const ThemeToggleButton(),
       ],
     );
   }

@@ -110,66 +110,84 @@ class NotificationsScreen extends ConsumerWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: notificationsState.when(
-        loading: () => _buildLoading(),
-        error: (err, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.refresh_rounded, size: 48, color: AppColors.primaryEmerald),
-              const SizedBox(height: 12),
-              const Text('Tap to refresh notifications', style: AppTypography.titleMedium),
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: () {
-                  HapticFeedbackHelper.light();
-                  ref.invalidate(notificationsProvider);
-                },
-                icon: const Icon(Icons.refresh),
-                label: const Text('Refresh'),
-              ),
-            ],
-          ),
-        ),
-        data: (data) {
-          final notifications = data['notifications'] as List<NotificationModel>;
-
-          if (notifications.isEmpty) {
-            return EmptyState(
-              icon: Icons.notifications_none_rounded,
-              title: 'You\'re All Caught Up',
-              message:
-                  'No notifications right now. Daily reminders, habit alerts, and streak achievements will appear here.',
-              buttonText: 'Test Local Reminder',
-              onAction: () async {
-                HapticFeedbackHelper.medium();
-                await LocalNotificationsService.showInstantNotification(
-                  id: 999,
-                  title: 'Consistency Reminder 🌟',
-                  body: 'A quick reminder to keep up your daily habits and maintain your streak!',
-                );
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Test notification delivered to system tray!'),
-                      backgroundColor: AppColors.primaryGreenAccent,
+      body: RefreshIndicator(
+        color: AppColors.primaryEmerald,
+        onRefresh: () async {
+          ref.invalidate(notificationsProvider);
+        },
+        child: notificationsState.when(
+          loading: () => _buildLoading(),
+          error: (err, _) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.7,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.refresh_rounded, size: 48, color: AppColors.primaryEmerald),
+                    const SizedBox(height: 12),
+                    const Text('Tap to refresh notifications', style: AppTypography.titleMedium),
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        HapticFeedbackHelper.light();
+                        ref.invalidate(notificationsProvider);
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Refresh'),
                     ),
-                  );
-                }
+                  ],
+                ),
+              ),
+            ),
+          ),
+          data: (data) {
+            final notifications = data['notifications'] as List<NotificationModel>;
+
+            if (notifications.isEmpty) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: EmptyState(
+                    icon: Icons.notifications_none_rounded,
+                    title: 'You\'re All Caught Up',
+                    message:
+                        'No notifications right now. Daily reminders, habit alerts, and streak achievements will appear here.',
+                    buttonText: 'Test Local Reminder',
+                    onAction: () async {
+                      HapticFeedbackHelper.medium();
+                      await LocalNotificationsService.showInstantNotification(
+                        id: 999,
+                        title: 'Consistency Reminder 🌟',
+                        body: 'A quick reminder to keep up your daily habits and maintain your streak!',
+                      );
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Test notification delivered to system tray!'),
+                            backgroundColor: AppColors.primaryGreenAccent,
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
+              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              itemCount: notifications.length,
+              itemBuilder: (context, index) {
+                final notif = notifications[index];
+                return _buildNotificationCard(context, ref, notif, isDark);
               },
             );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
-            physics: const BouncingScrollPhysics(),
-            itemCount: notifications.length,
-            itemBuilder: (context, index) {
-              final notif = notifications[index];
-              return _buildNotificationCard(context, ref, notif, isDark);
-            },
-          );
-        },
+          },
+        ),
       ),
     );
   }

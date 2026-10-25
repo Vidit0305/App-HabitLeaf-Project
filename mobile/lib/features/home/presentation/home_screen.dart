@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_typography.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/haptic_feedback_helper.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -227,7 +228,7 @@ class HomeScreen extends ConsumerWidget {
             const Icon(Icons.cloud_off_rounded, size: 54, color: AppColors.primaryEmerald),
             const SizedBox(height: 16),
             const Text(
-              'Habit Tracker',
+              AppConstants.appName,
               style: AppTypography.titleLarge,
             ),
             const SizedBox(height: 8),

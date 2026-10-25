@@ -1,5 +1,5 @@
 class AppConstants {
-  static const String appName = 'Habit Tracker';
+  static const String appName = 'HabitLeaf';
   static const String appVersion = '1.0.0';
   static const String keyInstallationId = 'installation_id';
   static const String keyCachedHabits = 'cached_habits_json';

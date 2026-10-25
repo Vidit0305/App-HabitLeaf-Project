@@ -71,7 +71,7 @@ class LocalStorage {
         {
           '_id': 'notif_welcome_${DateTime.now().millisecondsSinceEpoch}',
           'type': 'system',
-          'title': 'Welcome to Habit Tracker! 🌿',
+          'title': 'Welcome to HabitLeaf! 🌿',
           'message': 'Your live database is connected. Add your first habit to begin building daily consistency!',
           'status': 'read',
           'createdAt': DateTime.now().toIso8601String(),

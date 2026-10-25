@@ -159,15 +159,34 @@ class StatisticsRepository {
     // 4. Habit Comparison
     final List<HabitComparisonItem> habitComparison = habits.map((h) {
       final compCount = completions.where((c) => c['habitId'] == h.id && c['status'] == 'completed').length;
-      final scheduledEstimate = 14;
-      final pct = ((compCount / scheduledEstimate) * 100).clamp(0, 100).round();
+      
+      // Calculate true scheduled days from habit startDate to today
+      final start = DateTime(h.startDate.year, h.startDate.month, h.startDate.day);
+      final today = DateTime(now.year, now.month, now.day);
+      int daysSinceStart = today.difference(start).inDays + 1;
+      if (daysSinceStart < 1) daysSinceStart = 1;
+
+      // Count scheduled days according to frequency
+      final windowDays = daysSinceStart > 30 ? 30 : daysSinceStart;
+      int schedCount = 0;
+      for (int i = 0; i < windowDays; i++) {
+        final d = today.subtract(Duration(days: i));
+        if (h.frequency == 'every_day') {
+          schedCount++;
+        } else if (h.selectedWeekdays.contains(d.weekday)) {
+          schedCount++;
+        }
+      }
+      if (schedCount < 1) schedCount = 1;
+
+      final pct = ((compCount / schedCount) * 100).clamp(0, 100).round();
       return HabitComparisonItem(
         habitId: h.id,
         name: h.name,
         color: h.color,
         icon: h.icon,
-        scheduledCount: scheduledEstimate,
-        completedCount: compCount,
+        scheduledCount: schedCount,
+        completedCount: compCount > schedCount ? schedCount : compCount,
         percentage: pct,
       );
     }).toList();

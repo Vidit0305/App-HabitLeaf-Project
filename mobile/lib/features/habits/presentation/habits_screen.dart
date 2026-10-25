@@ -161,10 +161,16 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
 
           // 3. Habit List View
           Expanded(
-            child: habitsState.when(
-              loading: () => _buildLoadingList(),
-              error: (e, _) => _buildErrorRetry(ref),
-              data: (habits) => _buildHabitsList(habits, isDark),
+            child: RefreshIndicator(
+              color: AppColors.primaryEmerald,
+              onRefresh: () async {
+                await ref.read(habitsProvider.notifier).loadHabits();
+              },
+              child: habitsState.when(
+                loading: () => _buildLoadingList(),
+                error: (e, _) => _buildErrorRetry(ref),
+                data: (habits) => _buildHabitsList(habits, isDark),
+              ),
             ),
           ),
         ],
@@ -260,20 +266,26 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
     }
 
     if (filtered.isEmpty) {
-      return EmptyState(
-        icon: Icons.track_changes_rounded,
-        title: _searchQuery.isNotEmpty ? 'No Habits Found' : 'No Habits Yet',
-        message: _searchQuery.isNotEmpty
-            ? 'No habits match your search criteria.'
-            : 'Start tracking positive habits and build daily consistency.',
-        buttonText: 'Create Habit',
-        onAction: () => _openAddHabitModal(context),
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.5,
+          child: EmptyState(
+            icon: Icons.track_changes_rounded,
+            title: _searchQuery.isNotEmpty ? 'No Habits Found' : 'No Habits Yet',
+            message: _searchQuery.isNotEmpty
+                ? 'No habits match your search criteria.'
+                : 'Start tracking positive habits and build daily consistency.',
+            buttonText: 'Create Habit',
+            onAction: () => _openAddHabitModal(context),
+          ),
+        ),
       );
     }
 
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 100),
-      physics: const BouncingScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       itemCount: filtered.length,
       itemBuilder: (context, index) {
         final habit = filtered[index];
