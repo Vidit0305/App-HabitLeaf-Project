@@ -1,10 +1,18 @@
 import 'package:flutter/services.dart';
 
 class HapticFeedbackHelper {
+  /// General button tap vibration - called on ANY button pressed
+  static Future<void> buttonTap() async {
+    try {
+      await HapticFeedback.lightImpact();
+    } catch (_) {}
+  }
+
   /// Subtle click for tab bar selections, filter chips, radio choices
   static Future<void> selection() async {
     try {
       await HapticFeedback.selectionClick();
+      await HapticFeedback.lightImpact();
     } catch (_) {}
   }
 
@@ -29,11 +37,11 @@ class HapticFeedbackHelper {
     } catch (_) {}
   }
 
-  /// Premium double-pulse celebration vibration for completing a habit or milestone
+  /// Premium celebration vibration for completing a habit or milestone
   static Future<void> success() async {
     try {
       await HapticFeedback.mediumImpact();
-      await Future.delayed(const Duration(milliseconds: 70));
+      await Future.delayed(const Duration(milliseconds: 80));
       await HapticFeedback.lightImpact();
     } catch (_) {}
   }

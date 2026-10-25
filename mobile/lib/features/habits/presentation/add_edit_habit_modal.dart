@@ -60,7 +60,7 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
 
     _selectedCategory = h?.category ?? 'Health';
     _selectedIcon = h?.icon ?? 'fitness_center';
-    _selectedColorHex = h?.color ?? '#2563EB';
+    _selectedColorHex = h?.color ?? '#10B981';
     _habitType = h?.habitType ?? 'completion';
     _frequency = h?.frequency ?? 'every_day';
     _selectedWeekdays = h != null ? List<int>.from(h.selectedWeekdays) : [1, 2, 3, 4, 5, 6, 7];

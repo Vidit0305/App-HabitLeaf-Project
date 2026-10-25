@@ -3,6 +3,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/haptic_feedback_helper.dart';
 import '../../../../core/utils/icon_helper.dart';
+import '../../../../core/widgets/celebration_check_button.dart';
 import '../../../../core/widgets/custom_card.dart';
 import '../../../habits/models/habit_model.dart';
 
@@ -152,55 +153,12 @@ class TodayHabitCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
-              // Completion Checkbox / Toggle
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    if (!isDone) {
-                      HapticFeedbackHelper.success();
-                    } else {
-                      HapticFeedbackHelper.light();
-                    }
-                    onToggle();
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeOutBack,
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: isDone
-                          ? AppColors.primaryEmerald
-                          : (isDark ? AppColors.surfaceDarkElevated : Colors.white),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isDone
-                            ? AppColors.primaryEmerald
-                            : (isDark ? AppColors.borderDark : AppColors.borderLight),
-                        width: 1.5,
-                      ),
-                      boxShadow: isDone
-                          ? [
-                              BoxShadow(
-                                color: AppColors.primaryEmerald.withOpacity(0.35),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
-                              )
-                            ]
-                          : [],
-                    ),
-                    child: isDone
-                        ? const Icon(
-                            Icons.check_rounded,
-                            color: Colors.white,
-                            size: 22,
-                          )
-                        : null,
-                  ),
-                ),
+              const SizedBox(width: 8),
+              // Premium Celebration Checkbox / Toggle
+              CelebrationCheckButton(
+                isCompleted: isDone,
+                onToggle: onToggle,
+                size: 38,
               ),
             ],
           ),

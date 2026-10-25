@@ -9,14 +9,18 @@ async function connectDB() {
 
   if (!forceMemory) {
     try {
-      console.log(`[Database] Attempting connection to MongoDB at: ${uri}`);
+      console.log(`[Database] Attempting connection to MongoDB at: ${uri.replace(/:([^:@]+)@/, ':****@')}`);
       await mongoose.connect(uri, {
-        serverSelectionTimeoutMS: 2500,
+        serverSelectionTimeoutMS: 15000,
       });
-      console.log('[Database] Successfully connected to external/local MongoDB.');
+      console.log('[Database] Successfully connected to external/Atlas MongoDB.');
       return;
     } catch (err) {
-      console.warn(`[Database] Standard MongoDB connection failed: ${err.message}. Switching to embedded MongoDB engine...`);
+      console.error(`[Database] Standard MongoDB connection failed: ${err.message}.`);
+      if (process.env.NODE_ENV === 'production') {
+        throw err;
+      }
+      console.warn('[Database] Falling back to embedded MongoDB engine...');
     }
   }
 

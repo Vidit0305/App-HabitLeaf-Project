@@ -68,27 +68,26 @@ class HabitsRepository {
     String? category,
     String? search,
   }) async {
-    // 1. Try background sync if online, but NEVER block or crash
-    Future(() async {
-      try {
-        final query = <String, dynamic>{};
-        if (isArchived != null) query['isArchived'] = isArchived.toString();
-        if (category != null && category != 'All') query['category'] = category;
-        if (search != null && search.isNotEmpty) query['search'] = search;
+    // 1. Try fetching from live MongoDB backend first
+    try {
+      final query = <String, dynamic>{};
+      if (isArchived != null) query['isArchived'] = isArchived.toString();
+      if (category != null && category != 'All') query['category'] = category;
+      if (search != null && search.isNotEmpty) query['search'] = search;
 
-        final res = await apiClient.get(ApiConstants.habits, queryParameters: query);
-        if (res != null && res['data'] is List) {
-          final serverList = (res['data'] as List)
-              .map((item) => HabitModel.fromJson(item as Map<String, dynamic>))
-              .toList();
-          if (serverList.isNotEmpty) {
-            await _saveLocalHabits(serverList);
-          }
-        }
-      } catch (_) {}
-    });
+      final res = await apiClient.get(ApiConstants.habits, queryParameters: query);
+      if (res != null && res['data'] is List) {
+        final serverList = (res['data'] as List)
+            .map((item) => HabitModel.fromJson(item as Map<String, dynamic>))
+            .toList();
+        await _saveLocalHabits(serverList);
+        return serverList;
+      }
+    } catch (_) {
+      // Offline fallback: use local cache
+    }
 
-    // 2. Return local habits immediately
+    // 2. Fallback to cached habits
     var list = _getLocalHabits();
 
     if (isArchived != null) {
@@ -106,21 +105,36 @@ class HabitsRepository {
   }
 
   Future<HabitModel?> fetchHabitById(String id) async {
-    final list = _getLocalHabits();
-    final match = list.where((h) => h.id == id);
-    if (match.isNotEmpty) return match.first;
-
     try {
       final res = await apiClient.get('${ApiConstants.habits}/$id');
       if (res != null && res['data'] != null) {
-        return HabitModel.fromJson(res['data'] as Map<String, dynamic>);
+        final serverHabit = HabitModel.fromJson(res['data'] as Map<String, dynamic>);
+        return serverHabit;
       }
     } catch (_) {}
+
+    final list = _getLocalHabits();
+    final match = list.where((h) => h.id == id);
+    if (match.isNotEmpty) return match.first;
 
     return null;
   }
 
   Future<HabitModel> createHabit(Map<String, dynamic> habitData) async {
+    // 1. Send to live MongoDB backend
+    try {
+      final res = await apiClient.post(ApiConstants.habits, data: habitData);
+      if (res != null && res['data'] != null) {
+        final serverHabit = HabitModel.fromJson(res['data'] as Map<String, dynamic>);
+        final list = _getLocalHabits();
+        list.removeWhere((h) => h.id == serverHabit.id);
+        list.insert(0, serverHabit);
+        await _saveLocalHabits(list);
+        return serverHabit;
+      }
+    } catch (_) {}
+
+    // 2. Offline fallback creation
     final newId = 'habit_${const Uuid().v4()}';
     final now = DateTime.now();
 
@@ -135,17 +149,9 @@ class HabitsRepository {
 
     final newHabit = HabitModel.fromJson(data);
 
-    // Persist locally
     final list = _getLocalHabits();
     list.insert(0, newHabit);
     await _saveLocalHabits(list);
-
-    // Background sync to server if available
-    Future(() async {
-      try {
-        await apiClient.post(ApiConstants.habits, data: habitData);
-      } catch (_) {}
-    });
 
     return newHabit;
   }

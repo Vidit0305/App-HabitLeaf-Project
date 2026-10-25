@@ -50,32 +50,9 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Container(
-            height: 68,
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : Colors.white,
-              borderRadius: BorderRadius.circular(34),
-              border: Border.all(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                width: 1.2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: isDark
-                      ? Colors.black.withOpacity(0.5)
-                      : AppColors.primaryGreenAccent.withOpacity(0.08),
-                  blurRadius: 24,
-                  offset: const Offset(0, 10),
-                  spreadRadius: 0,
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: SizedBox(
+            height: 62,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [

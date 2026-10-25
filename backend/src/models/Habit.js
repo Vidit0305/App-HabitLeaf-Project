@@ -27,7 +27,7 @@ const HabitSchema = new mongoose.Schema(
     },
     color: {
       type: String,
-      default: '#2563EB', // Premium royal blue
+      default: '#10B981', // Emerald green
       trim: true,
     },
     category: {

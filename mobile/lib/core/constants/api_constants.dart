@@ -1,20 +1,11 @@
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
-
 class ApiConstants {
+  // Support local development on physical Android via adb reverse, Wi-Fi LAN IP, and local loopback
   static String get baseUrl {
-    if (kIsWeb) {
-      return 'http://127.0.0.1:5000/api';
-    }
-    try {
-      if (Platform.isAndroid) {
-        // 10.0.2.2 points to host machine from Android Emulator
-        // If testing on real physical device via adb reverse, 127.0.0.1 also works
-        return 'http://10.0.2.2:5000/api';
-      }
-    } catch (_) {}
+    // 127.0.0.1 routes instantly via adb reverse tcp:5000 tcp:5000 on physical device and localhost
     return 'http://127.0.0.1:5000/api';
   }
+
+  static const String lanBaseUrl = 'http://192.168.1.19:5000/api';
 
   // Endpoints
   static const String health = '/health';
