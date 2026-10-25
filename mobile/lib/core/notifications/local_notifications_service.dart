@@ -10,12 +10,11 @@ class LocalNotificationsService {
 
   static bool _isInitialized = false;
 
-  /// Custom notification channel with HabitLeaf specific sound
-  static const String channelId = 'habitleaf_reminders_channel_v2';
-  static const String channelName = 'HabitLeaf Reminders';
+  /// Original notification channel with default Android notification sound
+  static const String channelId = 'habit_reminders_channel';
+  static const String channelName = 'Habit Reminders';
   static const String channelDescription =
       'Notifications for daily habit reminders and streak achievements';
-  static const String soundResource = 'habitleaf_notification';
 
   /// Callback to notify in-app listeners (e.g. Riverpod notifications notifier)
   static void Function(Map<String, dynamic> notificationJson)? onNotificationReceived;
@@ -38,17 +37,17 @@ class LocalNotificationsService {
         },
       );
 
-      // Create Android Notification Channel with custom HabitLeaf sound
+      // Create Android Notification Channel with default sound and maximum importance
       final androidImplementation = _notificationsPlugin
           .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
       if (androidImplementation != null) {
+        await androidImplementation.requestNotificationsPermission();
+        await androidImplementation.requestExactAlarmsPermission();
         const AndroidNotificationChannel channel = AndroidNotificationChannel(
           channelId,
           channelName,
           description: channelDescription,
           importance: Importance.max,
-          playSound: true,
-          sound: RawResourceAndroidNotificationSound(soundResource),
         );
         await androidImplementation.createNotificationChannel(channel);
       }
@@ -90,8 +89,6 @@ class LocalNotificationsService {
         channelDescription: channelDescription,
         importance: Importance.max,
         priority: Priority.high,
-        playSound: true,
-        sound: RawResourceAndroidNotificationSound(soundResource),
         showWhen: true,
       );
 
