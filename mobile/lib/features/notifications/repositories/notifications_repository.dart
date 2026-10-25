@@ -26,25 +26,96 @@ class NotificationsRepository {
     await LocalStorage.setString(AppConstants.keyCachedNotifications, jsonEncode(jsonList));
   }
 
-  Future<Map<String, dynamic>> fetchNotifications({String? status}) async {
-    // Attempt background sync
+  Future<NotificationModel> addNotification({
+    required String title,
+    required String message,
+    String type = 'reminder',
+    String? habitId,
+    String? habitName,
+    String? habitIcon,
+    String? habitColor,
+  }) async {
+    final now = DateTime.now();
+    final newNotif = NotificationModel(
+      id: 'notif_${now.millisecondsSinceEpoch}',
+      type: type,
+      title: title,
+      message: message,
+      habitId: habitId,
+      habitName: habitName,
+      habitIcon: habitIcon,
+      habitColor: habitColor,
+      deliveredAt: now,
+      status: 'delivered',
+      createdAt: now,
+    );
+
+    final list = _getLocalNotifications();
+    list.removeWhere((n) => n.id == newNotif.id);
+    list.insert(0, newNotif);
+    await _saveLocalNotifications(list);
+
+    // Sync to backend in background
     Future(() async {
       try {
-        final query = <String, dynamic>{};
-        if (status != null) query['status'] = status;
-        final res = await apiClient.get(ApiConstants.notifications, queryParameters: query);
-        if (res != null && res['data'] is Map) {
-          final serverList = (res['data']['notifications'] as List? ?? [])
-              .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
-              .toList();
-          if (serverList.isNotEmpty) {
-            await _saveLocalNotifications(serverList);
-          }
-        }
+        await apiClient.post(
+          ApiConstants.notifications,
+          data: {
+            'title': title,
+            'message': message,
+            'type': type,
+            'habitId': ?habitId,
+            'status': 'delivered',
+            'deliveredAt': now.toIso8601String(),
+          },
+        );
       } catch (_) {}
     });
 
+    return newNotif;
+  }
+
+  Future<Map<String, dynamic>> fetchNotifications({String? status}) async {
+    // 1. Try fetching from server
+    try {
+      final query = <String, dynamic>{};
+      if (status != null) query['status'] = status;
+      final res = await apiClient
+          .get(ApiConstants.notifications, queryParameters: query)
+          .timeout(const Duration(seconds: 4));
+
+      if (res != null && res['data'] is Map) {
+        final serverList = (res['data']['notifications'] as List? ?? [])
+            .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+
+        final localList = _getLocalNotifications();
+        final serverIds = serverList.map((n) => n.id).toSet();
+        // Keep any local-only notifications (e.g. offline alerts/reminders)
+        final localOnly = localList.where((n) => !serverIds.contains(n.id)).toList();
+        final merged = [...localOnly, ...serverList];
+        merged.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        await _saveLocalNotifications(merged);
+
+        var filtered = merged;
+        if (status != null) {
+          filtered = filtered.where((n) => n.status == status).toList();
+        }
+        final unreadCount = filtered.where((n) => !n.isRead).length;
+
+        return {
+          'notifications': filtered,
+          'total': filtered.length,
+          'unreadCount': unreadCount,
+        };
+      }
+    } catch (_) {
+      // Offline fallback: continue to read from persistent storage
+    }
+
+    // 2. Return local notifications
     var list = _getLocalNotifications();
+    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     if (status != null) {
       list = list.where((n) => n.status == status).toList();
     }

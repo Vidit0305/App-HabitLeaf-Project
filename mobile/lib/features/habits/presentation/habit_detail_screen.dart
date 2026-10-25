@@ -420,12 +420,6 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
     final newArchived = !habit.isArchived;
     await ref.read(habitsProvider.notifier).archiveHabit(habit.id, newArchived);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(newArchived ? 'Habit archived.' : 'Habit unarchived.'),
-          backgroundColor: AppColors.primaryRoyalBlue,
-        ),
-      );
       Navigator.of(context).pop();
     }
   }
@@ -444,9 +438,6 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
       await ref.read(habitsProvider.notifier).deleteHabit(habit.id);
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Habit deleted permanently.')),
-        );
       }
     }
   }

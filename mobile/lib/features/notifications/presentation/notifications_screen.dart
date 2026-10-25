@@ -159,18 +159,11 @@ class NotificationsScreen extends ConsumerWidget {
                     onAction: () async {
                       HapticFeedbackHelper.medium();
                       await LocalNotificationsService.showInstantNotification(
-                        id: 999,
+                        id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
                         title: 'Consistency Reminder 🌟',
                         body: 'A quick reminder to keep up your daily habits and maintain your streak!',
+                        type: 'reminder',
                       );
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Test notification delivered to system tray!'),
-                            backgroundColor: AppColors.primaryGreenAccent,
-                          ),
-                        );
-                      }
                     },
                   ),
                 ),

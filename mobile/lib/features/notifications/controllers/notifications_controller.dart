@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/notifications/local_notifications_service.dart';
 import '../../../core/providers/app_providers.dart';
 import '../models/notification_model.dart';
 import '../repositories/notifications_repository.dart';
@@ -9,7 +10,72 @@ class NotificationsNotifier
 
   NotificationsNotifier({required this.repository})
       : super(const AsyncValue.loading()) {
+    LocalNotificationsService.onNotificationReceived = _handleIncomingNotification;
     loadNotifications();
+  }
+
+  void _handleIncomingNotification(Map<String, dynamic> json) {
+    try {
+      final notif = NotificationModel.fromJson(json);
+      state.whenData((current) {
+        final list = List<NotificationModel>.from(
+          current['notifications'] as List<NotificationModel>? ?? [],
+        );
+        list.removeWhere((n) => n.id == notif.id);
+        list.insert(0, notif);
+        final unread = (current['unreadCount'] as int? ?? 0) + 1;
+        state = AsyncValue.data({
+          'notifications': list,
+          'total': list.length,
+          'unreadCount': unread,
+        });
+      });
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    if (LocalNotificationsService.onNotificationReceived == _handleIncomingNotification) {
+      LocalNotificationsService.onNotificationReceived = null;
+    }
+    super.dispose();
+  }
+
+  Future<void> addNotification({
+    required String title,
+    required String message,
+    String type = 'reminder',
+    String? habitId,
+    String? habitName,
+    String? habitIcon,
+    String? habitColor,
+  }) async {
+    try {
+      final notif = await repository.addNotification(
+        title: title,
+        message: message,
+        type: type,
+        habitId: habitId,
+        habitName: habitName,
+        habitIcon: habitIcon,
+        habitColor: habitColor,
+      );
+      state.whenData((current) {
+        final list = List<NotificationModel>.from(
+          current['notifications'] as List<NotificationModel>? ?? [],
+        );
+        list.removeWhere((n) => n.id == notif.id);
+        list.insert(0, notif);
+        final unread = (current['unreadCount'] as int? ?? 0) + 1;
+        state = AsyncValue.data({
+          'notifications': list,
+          'total': list.length,
+          'unreadCount': unread,
+        });
+      });
+    } catch (_) {
+      loadNotifications();
+    }
   }
 
   Future<void> loadNotifications() async {

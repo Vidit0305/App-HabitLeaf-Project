@@ -104,10 +104,7 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_frequency == 'selected_weekdays' && _selectedWeekdays.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one weekday for this habit.')),
-      );
-      return;
+      _selectedWeekdays = [1, 2, 3, 4, 5, 6, 7];
     }
 
     setState(() => _isSaving = true);
@@ -157,24 +154,16 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
             id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
             title: '⏰ Habit Reminder Active',
             body: '$reminderMsg for "${_nameController.text.trim()}"',
+            habitId: widget.habitToEdit?.id,
+            habitName: _nameController.text.trim(),
+            habitIcon: _selectedIcon,
+            habitColor: _selectedColorHex,
+            type: 'reminder',
           );
         }
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.habitToEdit != null ? 'Habit updated successfully!' : 'Habit created successfully!',
-            ),
-            backgroundColor: AppColors.primaryEmerald,
-          ),
-        );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not save habit. Please try again.'),
-            backgroundColor: AppColors.errorRed,
-          ),
-        );
+        HapticFeedbackHelper.heavy();
       }
     }
   }

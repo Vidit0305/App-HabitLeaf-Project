@@ -180,6 +180,8 @@ class HabitsRepository {
             ? habitData['reminderEnabled'] as bool
             : current.reminderEnabled,
         reminderTime: habitData['reminderTime']?.toString() ?? current.reminderTime,
+        reminderType: habitData['reminderType']?.toString() ?? current.reminderType,
+        reminderIntervalMinutes: (habitData['reminderIntervalMinutes'] as num?)?.toInt() ?? current.reminderIntervalMinutes,
       );
       list[index] = updatedHabit;
       await _saveLocalHabits(list);
@@ -187,10 +189,19 @@ class HabitsRepository {
       updatedHabit = HabitModel.fromJson(habitData);
     }
 
-    // Sync in background
+    // Sync in background and update local copy if backend responds
     Future(() async {
       try {
-        await apiClient.patch('${ApiConstants.habits}/$id', data: habitData);
+        final res = await apiClient.patch('${ApiConstants.habits}/$id', data: habitData);
+        if (res != null && res['data'] != null) {
+          final serverHabit = HabitModel.fromJson(res['data'] as Map<String, dynamic>);
+          final currentList = _getLocalHabits();
+          final idx = currentList.indexWhere((h) => h.id == id);
+          if (idx != -1) {
+            currentList[idx] = serverHabit;
+            await _saveLocalHabits(currentList);
+          }
+        }
       } catch (_) {}
     });
 
