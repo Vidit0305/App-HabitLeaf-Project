@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../constants/app_constants.dart';
 import '../storage/local_storage.dart';
@@ -24,7 +24,7 @@ class LocalNotificationsService {
 
     try {
       const AndroidInitializationSettings initializationSettingsAndroid =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
+          AndroidInitializationSettings('ic_notification');
 
       const InitializationSettings initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid,
@@ -89,6 +89,9 @@ class LocalNotificationsService {
         channelDescription: channelDescription,
         importance: Importance.max,
         priority: Priority.high,
+        icon: 'ic_notification',
+        largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+        color: Color(0xFF10B981),
         showWhen: true,
       );
 

@@ -6,7 +6,6 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/notifications/local_notifications_service.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/haptic_feedback_helper.dart';
-import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../../core/widgets/custom_card.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
@@ -66,48 +65,9 @@ class NotificationsScreen extends ConsumerWidget {
             ),
           ],
         ),
-        actions: [
-          notificationsState.maybeWhen(
-            data: (data) {
-              final unread = (data['unreadCount'] as int? ?? 0);
-              final list = (data['notifications'] as List<NotificationModel>? ?? []);
-              return Row(
-                children: [
-                  if (unread > 0)
-                    TextButton.icon(
-                      onPressed: () {
-                        HapticFeedbackHelper.selection();
-                        ref.read(notificationsProvider.notifier).markAllAsRead();
-                      },
-                      icon: const Icon(Icons.done_all_rounded, size: 18),
-                      label: const Text('Mark all read'),
-                    ),
-                  if (list.isNotEmpty)
-                    IconButton(
-                      icon: const Icon(Icons.delete_sweep_outlined),
-                      tooltip: 'Clear All Notifications',
-                      onPressed: () async {
-                        HapticFeedbackHelper.light();
-                        final confirmed = await ConfirmationDialog.show(
-                          context: context,
-                          title: 'Clear Notifications?',
-                          message: 'Are you sure you want to clear your notification history?',
-                          confirmText: 'Clear All',
-                          isDestructive: true,
-                        );
-                        if (confirmed == true) {
-                          HapticFeedbackHelper.heavy();
-                          ref.read(notificationsProvider.notifier).clearAll();
-                        }
-                      },
-                    ),
-                ],
-              );
-            },
-            orElse: () => const SizedBox.shrink(),
-          ),
-          const ThemeToggleButton(),
-          const SizedBox(width: 8),
+        actions: const [
+          ThemeToggleButton(),
+          SizedBox(width: 8),
         ],
       ),
       body: RefreshIndicator(
