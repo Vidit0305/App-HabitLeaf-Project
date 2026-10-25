@@ -24,7 +24,7 @@ class LocalNotificationsService {
 
     try {
       const AndroidInitializationSettings initializationSettingsAndroid =
-          AndroidInitializationSettings('ic_notification');
+          AndroidInitializationSettings('@mipmap/ic_launcher');
 
       const InitializationSettings initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid,
@@ -82,6 +82,10 @@ class LocalNotificationsService {
     String? habitColor,
     String type = 'reminder',
   }) async {
+    if (!_isInitialized) {
+      await init();
+    }
+
     try {
       const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
         channelId,
@@ -89,7 +93,7 @@ class LocalNotificationsService {
         channelDescription: channelDescription,
         importance: Importance.max,
         priority: Priority.high,
-        icon: 'ic_notification',
+        icon: '@drawable/ic_notification',
         largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
         color: Color(0xFF10B981),
         showWhen: true,
@@ -103,21 +107,41 @@ class LocalNotificationsService {
         notificationDetails: details,
         payload: payload,
       );
-
-      // Record this notification persistently so it appears in the Notification screen
-      await _recordNotificationLocally(
-        id: id.toString(),
-        title: title,
-        message: body,
-        habitId: habitId,
-        habitName: habitName,
-        habitIcon: habitIcon,
-        habitColor: habitColor,
-        type: type,
-      );
     } catch (e) {
-      debugPrint('Error showing instant notification: $e');
+      debugPrint('Primary notification attempt failed: $e, running fail-safe fallback...');
+      try {
+        const AndroidNotificationDetails fallbackDetails = AndroidNotificationDetails(
+          channelId,
+          channelName,
+          channelDescription: channelDescription,
+          importance: Importance.max,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+          showWhen: true,
+        );
+        await _notificationsPlugin.show(
+          id: id,
+          title: title,
+          body: body,
+          notificationDetails: const NotificationDetails(android: fallbackDetails),
+          payload: payload,
+        );
+      } catch (err) {
+        debugPrint('Fallback notification error: $err');
+      }
     }
+
+    // Record this notification persistently so it appears in the Notification screen
+    await _recordNotificationLocally(
+      id: id.toString(),
+      title: title,
+      message: body,
+      habitId: habitId,
+      habitName: habitName,
+      habitIcon: habitIcon,
+      habitColor: habitColor,
+      type: type,
+    );
   }
 
   /// Saves the notification to local persistent cache and notifies active listeners
