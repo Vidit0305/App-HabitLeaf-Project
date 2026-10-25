@@ -10,6 +10,7 @@ import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../../core/widgets/custom_card.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
+import '../../../../core/widgets/theme_toggle_button.dart';
 import '../controllers/notifications_controller.dart';
 import '../models/notification_model.dart';
 
@@ -105,6 +106,8 @@ class NotificationsScreen extends ConsumerWidget {
             },
             orElse: () => const SizedBox.shrink(),
           ),
+          const ThemeToggleButton(),
+          const SizedBox(width: 8),
         ],
       ),
       body: notificationsState.when(

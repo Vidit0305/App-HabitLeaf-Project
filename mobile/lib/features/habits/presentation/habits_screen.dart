@@ -8,6 +8,7 @@ import '../../../../core/utils/icon_helper.dart';
 import '../../../../core/widgets/custom_card.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
+import '../../../../core/widgets/theme_toggle_button.dart';
 import '../controllers/habits_controller.dart';
 import '../models/habit_model.dart';
 import 'add_edit_habit_modal.dart';
@@ -21,10 +22,12 @@ class HabitsScreen extends ConsumerStatefulWidget {
 }
 
 class _HabitsScreenState extends ConsumerState<HabitsScreen> {
-  String _selectedStatus = 'Active'; // 'Active' or 'Archived'
   String _selectedCategory = 'All';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+
+  final List<String> _row1Categories = ['All', 'Health', 'Fitness', 'Productivity'];
+  final List<String> _row2Categories = ['Mindfulness', 'Learning', 'Finance', 'Personal'];
 
   @override
   void dispose() {
@@ -32,11 +35,20 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
     super.dispose();
   }
 
+  void _openAddHabitModal(BuildContext context) {
+    HapticFeedbackHelper.light();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const AddEditHabitModal(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final activeHabitsState = ref.watch(habitsProvider);
-    final archivedHabitsState = ref.watch(archivedHabitsProvider);
+    final habitsState = ref.watch(habitsProvider);
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.bgDark : AppColors.bgLight,
@@ -82,30 +94,17 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add_rounded),
-            tooltip: 'Add Habit',
-            onPressed: () => _openAddHabitModal(context),
-          ),
+        actions: const [
+          // Professional Dark/Light theme toggle button on top right
+          ThemeToggleButton(),
         ],
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 75),
-        child: FloatingActionButton.extended(
-          onPressed: () => _openAddHabitModal(context),
-          backgroundColor: AppColors.primaryGreenAccent,
-          foregroundColor: Colors.white,
-          elevation: 4,
-          icon: const Icon(Icons.add_rounded),
-          label: const Text('Add Habit', style: TextStyle(fontWeight: FontWeight.w700)),
-        ),
-      ),
+      // No floating action button on bottom right as requested
       body: Column(
         children: [
           // 1. Search Box
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
             child: TextField(
               controller: _searchController,
               onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
@@ -122,100 +121,101 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                         },
                       )
                     : null,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               ),
             ),
           ),
 
-          // 2. Status & Category Filter Tabs
+          // 2. All Categories arranged in 2 neat fixed rows (all 8 visible on screen, no scrolling)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-            child: Row(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+            child: Column(
               children: [
-                ChoiceChip(
-                  label: const Text('Active'),
-                  selected: _selectedStatus == 'Active',
-                  onSelected: (_) {
-                    HapticFeedbackHelper.selection();
-                    setState(() => _selectedStatus = 'Active');
-                  },
-                  selectedColor: AppColors.primaryGreenAccent,
-                  labelStyle: TextStyle(
-                    color: _selectedStatus == 'Active'
-                        ? Colors.white
-                        : (isDark ? AppColors.textLight : AppColors.textDarkNavy),
-                    fontWeight: FontWeight.w700,
-                  ),
+                // Row 1
+                Row(
+                  children: _row1Categories.map((cat) {
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        child: _buildCategoryChip(cat, isDark),
+                      ),
+                    );
+                  }).toList(),
                 ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  label: const Text('Archived'),
-                  selected: _selectedStatus == 'Archived',
-                  onSelected: (_) {
-                    HapticFeedbackHelper.selection();
-                    setState(() => _selectedStatus = 'Archived');
-                  },
-                  selectedColor: AppColors.primaryGreenAccent,
-                  labelStyle: TextStyle(
-                    color: _selectedStatus == 'Archived'
-                        ? Colors.white
-                        : (isDark ? AppColors.textLight : AppColors.textDarkNavy),
-                    fontWeight: FontWeight.w700,
-                  ),
+                const SizedBox(height: 6),
+                // Row 2
+                Row(
+                  children: _row2Categories.map((cat) {
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        child: _buildCategoryChip(cat, isDark),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ],
             ),
           ),
-
-          // Category Chips Bar
-          SizedBox(
-            height: 48,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              children: ['All', ...AppConstants.categories].map((category) {
-                final isSelected = _selectedCategory == category;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(category),
-                    selected: isSelected,
-                    onSelected: (_) {
-                      HapticFeedbackHelper.selection();
-                      setState(() => _selectedCategory = category);
-                    },
-                    selectedColor: isDark
-                        ? AppColors.primaryEmerald.withOpacity(0.25)
-                        : AppColors.primaryGreenSoft,
-                    labelStyle: TextStyle(
-                      fontSize: 12,
-                      color: isSelected
-                          ? (isDark ? AppColors.primaryGreenLight : AppColors.primaryGreenAccent)
-                          : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary),
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
 
           // 3. Habit List View
           Expanded(
-            child: _selectedStatus == 'Active'
-                ? activeHabitsState.when(
-                    loading: () => _buildLoadingList(),
-                    error: (e, _) => _buildErrorRetry(ref),
-                    data: (habits) => _buildHabitsList(habits, isDark),
-                  )
-                : archivedHabitsState.when(
-                    loading: () => _buildLoadingList(),
-                    error: (e, _) => _buildErrorRetry(ref),
-                    data: (habits) => _buildHabitsList(habits, isDark),
-                  ),
+            child: habitsState.when(
+              loading: () => _buildLoadingList(),
+              error: (e, _) => _buildErrorRetry(ref),
+              data: (habits) => _buildHabitsList(habits, isDark),
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryChip(String category, bool isDark) {
+    final isSelected = _selectedCategory == category;
+    return GestureDetector(
+      onTap: () {
+        HapticFeedbackHelper.selection();
+        setState(() => _selectedCategory = category);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 7),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primaryEmerald
+              : (isDark ? AppColors.surfaceDarkElevated : Colors.white),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primaryEmerald
+                : (isDark ? AppColors.borderDark : AppColors.borderLight),
+            width: isSelected ? 1.5 : 1.0,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primaryEmerald.withOpacity(0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          category,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+            color: isSelected
+                ? Colors.white
+                : (isDark ? AppColors.textLight : AppColors.textDarkNavy),
+          ),
+        ),
       ),
     );
   }
@@ -243,7 +243,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
   }
 
   Widget _buildHabitsList(List<HabitModel> habits, bool isDark) {
-    var filtered = habits;
+    var filtered = habits.where((h) => !h.isArchived).toList();
 
     // Filter by Category
     if (_selectedCategory != 'All') {
@@ -261,26 +261,19 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
 
     if (filtered.isEmpty) {
       return EmptyState(
-        icon: _selectedStatus == 'Active'
-            ? Icons.track_changes_rounded
-            : Icons.archive_outlined,
-        title: _selectedStatus == 'Active'
-            ? (_searchQuery.isNotEmpty ? 'No Habits Found' : 'No Active Habits')
-            : 'No Archived Habits',
-        message: _selectedStatus == 'Active'
-            ? (_searchQuery.isNotEmpty
-                ? 'No habits match your search criteria.'
-                : 'Start tracking positive habits and build daily consistency.')
-            : 'Archived habits will appear here.',
-        buttonText: _selectedStatus == 'Active' ? 'Create New Habit' : null,
-        onAction: _selectedStatus == 'Active'
-            ? () => _openAddHabitModal(context)
-            : null,
+        icon: Icons.track_changes_rounded,
+        title: _searchQuery.isNotEmpty ? 'No Habits Found' : 'No Habits Yet',
+        message: _searchQuery.isNotEmpty
+            ? 'No habits match your search criteria.'
+            : 'Start tracking positive habits and build daily consistency.',
+        buttonText: 'Create Habit',
+        onAction: () => _openAddHabitModal(context),
       );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 120),
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 100),
+      physics: const BouncingScrollPhysics(),
       itemCount: filtered.length,
       itemBuilder: (context, index) {
         final habit = filtered[index];
@@ -295,9 +288,10 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
               ),
             );
           },
-          padding: const EdgeInsets.all(16),
-          margin: const EdgeInsets.only(bottom: 12),
-          borderRadius: 18,
+          padding: const EdgeInsets.all(14),
+          margin: const EdgeInsets.only(bottom: 10),
+          borderRadius: 16,
+          backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
           child: Row(
             children: [
               // Habit Icon
@@ -335,14 +329,14 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: habitColor.withOpacity(0.1),
+                            color: habitColor.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             habit.category,
                             style: TextStyle(
                               fontSize: 10,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w700,
                               color: habitColor,
                             ),
                           ),
@@ -361,59 +355,37 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                   ],
                 ),
               ),
-              // Streak / Reminder indicator
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  if (habit.currentStreak > 0)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryGreenSoft.withOpacity(isDark ? 0.2 : 0.6),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.local_fire_department_rounded,
-                              color: AppColors.primaryGreenAccent, size: 14),
-                          const SizedBox(width: 3),
-                          Text(
-                            '${habit.currentStreak}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primaryGreenAccent,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  if (habit.reminderEnabled) ...[
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.alarm_rounded,
-                            size: 13,
-                            color: isDark ? AppColors.textMuted : AppColors.textSecondary),
-                        const SizedBox(width: 2),
-                        Text(
-                          habit.reminderTime,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isDark ? AppColors.textMuted : AppColors.textSecondary,
-                          ),
+              // Streak indicator
+              if (habit.currentStreak > 0) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGreenSoft.withOpacity(isDark ? 0.2 : 0.6),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.local_fire_department_rounded,
+                          color: AppColors.primaryGreenAccent, size: 14),
+                      const SizedBox(width: 3),
+                      Text(
+                        '${habit.currentStreak}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryGreenAccent,
                         ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-              const SizedBox(width: 4),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
               Icon(
                 Icons.chevron_right_rounded,
-                color: isDark ? AppColors.textMuted : AppColors.borderLight,
+                color: isDark ? AppColors.textMuted : AppColors.textSecondary,
+                size: 20,
               ),
             ],
           ),
@@ -424,22 +396,12 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
 
   Widget _buildLoadingList() {
     return ListView.builder(
-      padding: const EdgeInsets.all(20),
-      itemCount: 5,
-      itemBuilder: (_, _) => const Padding(
+      padding: const EdgeInsets.all(16),
+      itemCount: 4,
+      itemBuilder: (_, __) => const Padding(
         padding: EdgeInsets.only(bottom: 12),
-        child: SkeletonLoader(width: double.infinity, height: 74, borderRadius: 18),
+        child: SkeletonLoader(width: double.infinity, height: 72, borderRadius: 16),
       ),
-    );
-  }
-
-  void _openAddHabitModal(BuildContext context) {
-    HapticFeedbackHelper.light();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const AddEditHabitModal(),
     );
   }
 }

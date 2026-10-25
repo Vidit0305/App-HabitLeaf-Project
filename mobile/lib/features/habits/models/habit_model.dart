@@ -14,6 +14,8 @@ class HabitModel {
   final DateTime? endDate;
   final bool reminderEnabled;
   final String reminderTime;
+  final String reminderType; // 'specific_time' or 'interval'
+  final int reminderIntervalMinutes; // 5, 10, 15, 30, 60, etc.
   final bool isArchived;
   final int currentStreak;
   final int longestStreak;
@@ -24,8 +26,8 @@ class HabitModel {
     required this.id,
     required this.name,
     this.description = '',
-    this.icon = 'check_circle',
-    this.color = '#2563EB',
+    this.icon = 'track_changes',
+    this.color = '#10B981',
     this.category = 'Health',
     this.habitType = 'completion',
     this.targetValue = 1.0,
@@ -36,6 +38,8 @@ class HabitModel {
     this.endDate,
     this.reminderEnabled = false,
     this.reminderTime = '09:00',
+    this.reminderType = 'specific_time',
+    this.reminderIntervalMinutes = 15,
     this.isArchived = false,
     this.currentStreak = 0,
     this.longestStreak = 0,
@@ -62,8 +66,8 @@ class HabitModel {
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
-      icon: json['icon']?.toString() ?? 'check_circle',
-      color: json['color']?.toString() ?? '#2563EB',
+      icon: json['icon']?.toString() ?? 'track_changes',
+      color: json['color']?.toString() ?? '#10B981',
       category: json['category']?.toString() ?? 'Health',
       habitType: json['habitType']?.toString() ?? 'completion',
       targetValue: (json['targetValue'] as num?)?.toDouble() ?? 1.0,
@@ -78,6 +82,8 @@ class HabitModel {
           : null,
       reminderEnabled: json['reminderEnabled'] == true,
       reminderTime: json['reminderTime']?.toString() ?? '09:00',
+      reminderType: json['reminderType']?.toString() ?? 'specific_time',
+      reminderIntervalMinutes: (json['reminderIntervalMinutes'] as num?)?.toInt() ?? 15,
       isArchived: json['isArchived'] == true,
       currentStreak: (json['currentStreak'] as num?)?.toInt() ?? 0,
       longestStreak: (json['longestStreak'] as num?)?.toInt() ?? 0,
@@ -103,6 +109,8 @@ class HabitModel {
       'endDate': endDate?.toIso8601String(),
       'reminderEnabled': reminderEnabled,
       'reminderTime': reminderTime,
+      'reminderType': reminderType,
+      'reminderIntervalMinutes': reminderIntervalMinutes,
       'isArchived': isArchived,
       'currentStreak': currentStreak,
       'longestStreak': longestStreak,
@@ -127,6 +135,8 @@ class HabitModel {
     DateTime? endDate,
     bool? reminderEnabled,
     String? reminderTime,
+    String? reminderType,
+    int? reminderIntervalMinutes,
     bool? isArchived,
     int? currentStreak,
     int? longestStreak,
@@ -149,6 +159,8 @@ class HabitModel {
       endDate: endDate ?? this.endDate,
       reminderEnabled: reminderEnabled ?? this.reminderEnabled,
       reminderTime: reminderTime ?? this.reminderTime,
+      reminderType: reminderType ?? this.reminderType,
+      reminderIntervalMinutes: reminderIntervalMinutes ?? this.reminderIntervalMinutes,
       isArchived: isArchived ?? this.isArchived,
       currentStreak: currentStreak ?? this.currentStreak,
       longestStreak: longestStreak ?? this.longestStreak,

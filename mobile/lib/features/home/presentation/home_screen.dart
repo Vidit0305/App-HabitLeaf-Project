@@ -12,8 +12,6 @@ import '../../settings/controllers/settings_controller.dart';
 import '../../statistics/controllers/statistics_controller.dart';
 import 'widgets/daily_progress_card.dart';
 import 'widgets/home_header.dart';
-import 'widgets/motivational_card.dart';
-import 'widgets/quick_actions_bar.dart';
 import 'widgets/streak_summary_card.dart';
 import 'widgets/today_habit_card.dart';
 
@@ -98,23 +96,9 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 20),
 
-                    // 4. Quick Actions
-                    QuickActionsBar(
-                      onAddHabit: () => _openAddHabitModal(context),
-                      onViewAllHabits: () => onNavigateTab?.call(1), // My Habits tab
-                      onOpenCalendar: () => onNavigateTab?.call(3), // Statistics tab
-                      onReviewProgress: () => onNavigateTab?.call(3), // Statistics tab
-                    ),
-                    const SizedBox(height: 20),
-
-                    // 5. Motivational Card
-                    MotivationalCard(
-                      completedToday: completedToday,
-                      totalScheduled: totalScheduled,
-                    ),
                     const SizedBox(height: 24),
 
-                    // 6. Today's Habits Section Header
+                    // 4. Today's Habits Section Header
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

@@ -75,6 +75,15 @@ const HabitSchema = new mongoose.Schema(
       type: String,
       default: '09:00',
     },
+    reminderType: {
+      type: String,
+      enum: ['specific_time', 'interval'],
+      default: 'specific_time',
+    },
+    reminderIntervalMinutes: {
+      type: Number,
+      default: 15,
+    },
     reminderWeekdays: {
       type: [Number],
       default: [],

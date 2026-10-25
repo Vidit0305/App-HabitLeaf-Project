@@ -9,6 +9,7 @@ import '../../../../core/utils/haptic_feedback_helper.dart';
 import '../../../../core/utils/icon_helper.dart';
 import '../../../../core/widgets/custom_card.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
+import '../../../../core/widgets/theme_toggle_button.dart';
 import '../controllers/statistics_controller.dart';
 import '../models/statistics_model.dart';
 
@@ -68,6 +69,10 @@ class StatisticsScreen extends ConsumerWidget {
             ),
           ],
         ),
+        actions: const [
+          ThemeToggleButton(),
+          SizedBox(width: 8),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {

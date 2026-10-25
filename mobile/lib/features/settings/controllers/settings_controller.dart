@@ -40,6 +40,13 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
       state = ThemeMode.system;
     }
   }
+
+  void toggleTheme() {
+    final next = (state == ThemeMode.light) ? ThemeMode.dark : ThemeMode.light;
+    state = next;
+    final str = next == ThemeMode.light ? 'light' : 'dark';
+    LocalStorage.setString(AppConstants.keyThemeMode, str);
+  }
 }
 
 class SettingsNotifier extends StateNotifier<AsyncValue<SettingsModel>> {
@@ -56,7 +63,10 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsModel>> {
     try {
       final s = await repository.fetchSettings();
       state = AsyncValue.data(s);
-      ref.read(appThemeModeProvider.notifier).setTheme(s.themeMode);
+      final localTheme = LocalStorage.getString(AppConstants.keyThemeMode);
+      if (localTheme == null || localTheme.isEmpty) {
+        ref.read(appThemeModeProvider.notifier).setTheme(s.themeMode);
+      }
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
