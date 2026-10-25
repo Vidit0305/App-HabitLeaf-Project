@@ -109,14 +109,6 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
             },
           ),
           IconButton(
-            icon: Icon(habit.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined),
-            tooltip: habit.isArchived ? 'Unarchive' : 'Archive',
-            onPressed: () {
-              HapticFeedbackHelper.selection();
-              _toggleArchive(habit);
-            },
-          ),
-          IconButton(
             icon: const Icon(Icons.delete_outline_rounded, color: AppColors.errorRed),
             tooltip: 'Delete Habit',
             onPressed: () {

@@ -10,8 +10,7 @@ class ThemeToggleButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(appThemeModeProvider);
-    final isDark = themeMode == ThemeMode.dark ||
-        (themeMode == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
+    final isDark = themeMode == ThemeMode.dark;
 
     return Padding(
       padding: const EdgeInsets.only(right: 12),

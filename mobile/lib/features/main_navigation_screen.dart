@@ -59,71 +59,84 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Container(
-            height: 66,
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : Colors.white,
-              borderRadius: BorderRadius.circular(33),
-              border: Border.all(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                width: 1.2,
+          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 10, top: 14),
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.bottomCenter,
+            children: [
+              // 1. Curved dock container
+              Container(
+                height: 64,
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.surfaceDark : Colors.white,
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(
+                    color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black.withOpacity(0.45)
+                          : AppColors.primaryGreenAccent.withOpacity(0.08),
+                      blurRadius: 22,
+                      offset: const Offset(0, 8),
+                      spreadRadius: 0,
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    _buildNavItem(
+                      index: 0,
+                      label: 'Home',
+                      icon: Icons.cottage_outlined,
+                      activeIcon: Icons.cottage_rounded,
+                      isSelected: _currentIndex == 0,
+                      isDark: isDark,
+                    ),
+                    _buildNavItem(
+                      index: 1,
+                      label: 'My Habits',
+                      icon: Icons.verified_outlined,
+                      activeIcon: Icons.verified_rounded,
+                      isSelected: _currentIndex == 1,
+                      isDark: isDark,
+                    ),
+                    // Reserved spacing for the out-of-the-box floating + button
+                    const SizedBox(width: 64),
+                    _buildNavItem(
+                      index: 2,
+                      label: 'Notifications',
+                      icon: Icons.notifications_none_rounded,
+                      activeIcon: Icons.notifications_rounded,
+                      isSelected: _currentIndex == 2,
+                      isDark: isDark,
+                      badgeCount: unreadCount,
+                    ),
+                    _buildNavItem(
+                      index: 3,
+                      label: 'Statistics',
+                      icon: Icons.insights_outlined,
+                      activeIcon: Icons.insights_rounded,
+                      isSelected: _currentIndex == 3,
+                      isDark: isDark,
+                    ),
+                  ],
+                ),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: isDark
-                      ? Colors.black.withOpacity(0.45)
-                      : AppColors.primaryGreenAccent.withOpacity(0.08),
-                  blurRadius: 22,
-                  offset: const Offset(0, 8),
-                  spreadRadius: 0,
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildNavItem(
-                  index: 0,
-                  label: 'Home',
-                  icon: Icons.cottage_outlined,
-                  activeIcon: Icons.cottage_rounded,
-                  isSelected: _currentIndex == 0,
-                  isDark: isDark,
-                ),
-                _buildNavItem(
-                  index: 1,
-                  label: 'My Habits',
-                  icon: Icons.verified_outlined,
-                  activeIcon: Icons.verified_rounded,
-                  isSelected: _currentIndex == 1,
-                  isDark: isDark,
-                ),
-                _buildCenterAddButton(isDark),
-                _buildNavItem(
-                  index: 2,
-                  label: 'Notifications',
-                  icon: Icons.notifications_none_rounded,
-                  activeIcon: Icons.notifications_rounded,
-                  isSelected: _currentIndex == 2,
-                  isDark: isDark,
-                  badgeCount: unreadCount,
-                ),
-                _buildNavItem(
-                  index: 3,
-                  label: 'Statistics',
-                  icon: Icons.insights_outlined,
-                  activeIcon: Icons.insights_rounded,
-                  isSelected: _currentIndex == 3,
-                  isDark: isDark,
-                ),
-              ],
-            ),
+
+              // 2. Elevated Out-of-the-box + Button
+              Positioned(
+                bottom: 16,
+                child: _buildCenterAddButton(isDark),
+              ),
+            ],
           ),
         ),
       ),
@@ -135,19 +148,29 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
       onTap: _openAddHabitModal,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        width: 48,
-        height: 48,
+        width: 60,
+        height: 60,
         decoration: BoxDecoration(
+          shape: BoxShape.circle,
           gradient: const LinearGradient(
-            colors: [Color(0xFF10B981), Color(0xFF059669)],
+            colors: [Color(0xFF10B981), Color(0xFF047857)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          shape: BoxShape.circle,
+          border: Border.all(
+            color: isDark ? AppColors.surfaceDark : Colors.white,
+            width: 4,
+          ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF10B981).withOpacity(0.45),
-              blurRadius: 10,
+              color: const Color(0xFF10B981).withOpacity(0.55),
+              blurRadius: 18,
+              spreadRadius: 2,
+              offset: const Offset(0, 6),
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(isDark ? 0.35 : 0.12),
+              blurRadius: 8,
               offset: const Offset(0, 4),
             ),
           ],
@@ -156,7 +179,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
           child: Icon(
             Icons.add_rounded,
             color: Colors.white,
-            size: 28,
+            size: 34,
           ),
         ),
       ),
@@ -182,71 +205,52 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
-              padding: EdgeInsets.symmetric(
-                horizontal: isSelected ? 14 : 6,
-                vertical: 4,
-              ),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? (isDark
-                        ? AppColors.primaryEmerald.withOpacity(0.18)
-                        : AppColors.primaryGreenUltraSoft)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Icon(
-                    isSelected ? activeIcon : icon,
-                    size: 24,
-                    color: isSelected ? activeColor : inactiveColor,
-                  ),
-                  if (badgeCount > 0)
-                    Positioned(
-                      top: -4,
-                      right: -6,
-                      child: Container(
-                        padding: const EdgeInsets.all(3.5),
-                        decoration: const BoxDecoration(
-                          color: AppColors.errorRed,
-                          shape: BoxShape.circle,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  isSelected ? activeIcon : icon,
+                  size: 24,
+                  color: isSelected ? activeColor : inactiveColor,
+                ),
+                if (badgeCount > 0)
+                  Positioned(
+                    top: -4,
+                    right: -6,
+                    child: Container(
+                      padding: const EdgeInsets.all(3.5),
+                      decoration: const BoxDecoration(
+                        color: AppColors.errorRed,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 15,
+                        minHeight: 15,
+                      ),
+                      child: Text(
+                        '$badgeCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          height: 1,
                         ),
-                        constraints: const BoxConstraints(
-                          minWidth: 15,
-                          minHeight: 15,
-                        ),
-                        child: Text(
-                          '$badgeCount',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            height: 1,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
-            const SizedBox(height: 3),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected ? activeColor : inactiveColor,
                 letterSpacing: isSelected ? -0.1 : 0,
-              ),
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

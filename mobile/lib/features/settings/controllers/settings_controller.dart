@@ -15,29 +15,26 @@ final appThemeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>
 });
 
 class ThemeModeNotifier extends StateNotifier<ThemeMode> {
-  ThemeModeNotifier() : super(ThemeMode.system) {
+  ThemeModeNotifier() : super(ThemeMode.light) {
     loadTheme();
   }
 
   void loadTheme() {
     final saved = LocalStorage.getString(AppConstants.keyThemeMode);
-    if (saved == 'light') {
-      state = ThemeMode.light;
-    } else if (saved == 'dark') {
+    if (saved == 'dark') {
       state = ThemeMode.dark;
     } else {
-      state = ThemeMode.system;
+      // Default to Light theme until user explicitly changes to dark
+      state = ThemeMode.light;
     }
   }
 
   Future<void> setTheme(String mode) async {
     await LocalStorage.setString(AppConstants.keyThemeMode, mode);
-    if (mode == 'light') {
-      state = ThemeMode.light;
-    } else if (mode == 'dark') {
+    if (mode == 'dark') {
       state = ThemeMode.dark;
     } else {
-      state = ThemeMode.system;
+      state = ThemeMode.light;
     }
   }
 

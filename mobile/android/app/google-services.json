@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "163235722110",
+    "project_id": "app-habitleaf-project",
+    "storage_bucket": "app-habitleaf-project.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:163235722110:android:63b84adfa8c416f527b92f",
+        "android_client_info": {
+          "package_name": "com.habittracker.premium.habit_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMm9Sj1bPFiGeTSRekQ07LI9ldeDnjVjg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
