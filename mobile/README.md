@@ -34,6 +34,12 @@ A personal Habit Tracker Android application built with **Flutter 3**, **Dart**,
    - Instant response with zero loading timeouts.
    - Transparent background synchronization when the backend API is reachable.
 
+6. **Habit Monthly History & Calendar Visualization**
+   - Direct access from the Statistics screen habit cards.
+   - Comprehensive month-by-month grid from habit start date through present day.
+   - Green (completed) vs. neutral/white (uncompleted) visual tracking.
+   - Focused, clean design for distraction-free habit monitoring.
+
 ---
 
 ## 🛠️ Build Release APK
