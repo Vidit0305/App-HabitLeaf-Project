@@ -8,6 +8,9 @@ class AppConstants {
   static const String keyCachedSettings = 'cached_settings_json';
   static const String keyThemeMode = 'app_theme_mode';
 
+  /// Default buffer of months to display when rendering historical calendar logs
+  static const int defaultHistoryMonthsBuffer = 12;
+
   static const List<String> categories = [
     'Health',
     'Fitness',
