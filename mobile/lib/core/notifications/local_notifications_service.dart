@@ -10,6 +10,9 @@ class LocalNotificationsService {
 
   static bool _isInitialized = false;
 
+  /// Check whether notifications service has completed initialization
+  static bool get isInitialized => _isInitialized;
+
   /// Original notification channel with default Android notification sound
   static const String channelId = 'habit_reminders_channel';
   static const String channelName = 'Habit Reminders';
