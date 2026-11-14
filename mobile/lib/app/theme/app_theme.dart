@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
-import 'app_typography.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {
@@ -18,6 +17,19 @@ class AppTheme {
         onSecondary: Colors.white,
         onSurface: AppColors.textDarkNavy,
       ),
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(color: AppColors.textDarkNavy, fontWeight: FontWeight.w800),
+        displayMedium: TextStyle(color: AppColors.textDarkNavy, fontWeight: FontWeight.w700),
+        titleLarge: TextStyle(color: AppColors.textDarkNavy, fontWeight: FontWeight.w600),
+        titleMedium: TextStyle(color: AppColors.textDarkNavy, fontWeight: FontWeight.w600),
+        titleSmall: TextStyle(color: AppColors.textDarkNavy, fontWeight: FontWeight.w600),
+        bodyLarge: TextStyle(color: AppColors.textDarkNavy, fontWeight: FontWeight.w500),
+        bodyMedium: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w400),
+        bodySmall: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w400),
+        labelLarge: TextStyle(color: AppColors.textDarkNavy, fontWeight: FontWeight.w600),
+        labelMedium: TextStyle(color: AppColors.primaryGreenAccent, fontWeight: FontWeight.w600),
+        labelSmall: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600),
+      ),
       cardTheme: CardThemeData(
         color: AppColors.surfaceLight,
         elevation: 0,
@@ -33,7 +45,11 @@ class AppTheme {
         scrolledUnderElevation: 0,
         centerTitle: false,
         iconTheme: IconThemeData(color: AppColors.textDarkNavy),
-        titleTextStyle: AppTypography.titleLarge,
+        titleTextStyle: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textDarkNavy,
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -55,8 +71,30 @@ class AppTheme {
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.errorRed),
         ),
-        labelStyle: AppTypography.bodyMedium,
-        hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
+        labelStyle: const TextStyle(color: AppColors.textSecondary),
+        hintStyle: const TextStyle(color: AppColors.textMuted),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.bgLight,
+        selectedColor: AppColors.primaryGreenAccent,
+        labelStyle: const TextStyle(color: AppColors.textDarkNavy, fontWeight: FontWeight.w600),
+        secondaryLabelStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        side: const BorderSide(color: AppColors.borderLight),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.surfaceLight,
+        titleTextStyle: const TextStyle(color: AppColors.textDarkNavy, fontSize: 18, fontWeight: FontWeight.w700),
+        contentTextStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: AppColors.surfaceLight,
+        modalBackgroundColor: AppColors.surfaceLight,
+      ),
+      listTileTheme: const ListTileThemeData(
+        textColor: AppColors.textDarkNavy,
+        iconColor: AppColors.primaryGreenAccent,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -108,6 +146,19 @@ class AppTheme {
         onSecondary: AppColors.bgDark,
         onSurface: AppColors.textLight,
       ),
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(color: AppColors.textLight, fontWeight: FontWeight.w800),
+        displayMedium: TextStyle(color: AppColors.textLight, fontWeight: FontWeight.w700),
+        titleLarge: TextStyle(color: AppColors.textLight, fontWeight: FontWeight.w600),
+        titleMedium: TextStyle(color: AppColors.textLight, fontWeight: FontWeight.w600),
+        titleSmall: TextStyle(color: AppColors.textLight, fontWeight: FontWeight.w600),
+        bodyLarge: TextStyle(color: AppColors.textLight, fontWeight: FontWeight.w500),
+        bodyMedium: TextStyle(color: AppColors.textSecondaryDark, fontWeight: FontWeight.w400),
+        bodySmall: TextStyle(color: AppColors.textSecondaryDark, fontWeight: FontWeight.w400),
+        labelLarge: TextStyle(color: AppColors.textLight, fontWeight: FontWeight.w600),
+        labelMedium: TextStyle(color: AppColors.primaryGreenLight, fontWeight: FontWeight.w600),
+        labelSmall: TextStyle(color: AppColors.textSecondaryDark, fontWeight: FontWeight.w600),
+      ),
       cardTheme: CardThemeData(
         color: AppColors.surfaceDark,
         elevation: 0,
@@ -151,6 +202,29 @@ class AppTheme {
         ),
         labelStyle: const TextStyle(color: AppColors.textSecondaryDark),
         hintStyle: TextStyle(color: AppColors.textSecondaryDark.withOpacity(0.6)),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.surfaceDarkElevated,
+        selectedColor: AppColors.primaryEmerald,
+        disabledColor: AppColors.surfaceDark,
+        labelStyle: const TextStyle(color: AppColors.textLight, fontWeight: FontWeight.w600),
+        secondaryLabelStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        side: const BorderSide(color: AppColors.borderDark),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.surfaceDark,
+        titleTextStyle: const TextStyle(color: AppColors.textLight, fontSize: 18, fontWeight: FontWeight.w700),
+        contentTextStyle: const TextStyle(color: AppColors.textSecondaryDark, fontSize: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: AppColors.surfaceDark,
+        modalBackgroundColor: AppColors.surfaceDark,
+      ),
+      listTileTheme: const ListTileThemeData(
+        textColor: AppColors.textLight,
+        iconColor: AppColors.primaryGreenLight,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
