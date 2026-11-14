@@ -87,7 +87,12 @@ class NotificationsScreen extends ConsumerWidget {
                   children: [
                     const Icon(Icons.refresh_rounded, size: 48, color: AppColors.primaryEmerald),
                     const SizedBox(height: 12),
-                    const Text('Tap to refresh notifications', style: AppTypography.titleMedium),
+                    Text(
+                      'Tap to refresh notifications',
+                      style: AppTypography.titleMedium.copyWith(
+                        color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
                       onPressed: () {
@@ -256,7 +261,7 @@ class NotificationsScreen extends ConsumerWidget {
                     DateFormatter.formatShortDate(notif.createdAt),
                     style: TextStyle(
                       fontSize: 11,
-                      color: isDark ? AppColors.textMuted : AppColors.textMuted,
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textMuted,
                     ),
                   ),
                 ],

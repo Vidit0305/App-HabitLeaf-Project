@@ -209,7 +209,7 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close_rounded),
+                icon: Icon(Icons.close_rounded, color: isDark ? AppColors.textLight : AppColors.textDarkNavy),
                 onPressed: () {
                   HapticFeedbackHelper.light();
                   Navigator.of(context).pop();
@@ -229,7 +229,12 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Habit Name Field
-                    Text('Habit Name', style: AppTypography.titleMedium),
+                    Text(
+                      'Habit Name',
+                      style: AppTypography.titleMedium.copyWith(
+                        color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _nameController,
@@ -250,7 +255,12 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                     const SizedBox(height: 16),
 
                     // Description Field
-                    Text('Description (Optional)', style: AppTypography.titleMedium),
+                    Text(
+                      'Description (Optional)',
+                      style: AppTypography.titleMedium.copyWith(
+                        color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _descController,
@@ -263,7 +273,12 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                     const SizedBox(height: 20),
 
                     // Category Picker
-                    Text('Category', style: AppTypography.titleMedium),
+                    Text(
+                      'Category',
+                      style: AppTypography.titleMedium.copyWith(
+                        color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -288,7 +303,12 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                     const SizedBox(height: 20),
 
                     // Icon Picker
-                    Text('Icon & Symbol', style: AppTypography.titleMedium),
+                    Text(
+                      'Icon & Symbol',
+                      style: AppTypography.titleMedium.copyWith(
+                        color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     SizedBox(
                       height: 52,
@@ -332,7 +352,12 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Accent Color', style: AppTypography.titleMedium),
+                        Text(
+                          'Accent Color',
+                          style: AppTypography.titleMedium.copyWith(
+                            color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                          ),
+                        ),
                         Container(
                           width: 22,
                           height: 22,
@@ -391,7 +416,12 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                     const SizedBox(height: 24),
 
                     // Habit Type (Completion vs Measurable)
-                    Text('Habit Type', style: AppTypography.titleMedium),
+                    Text(
+                      'Habit Type',
+                      style: AppTypography.titleMedium.copyWith(
+                        color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -435,7 +465,12 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Daily Target', style: AppTypography.bodyMedium),
+                                Text(
+                                  'Daily Target',
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                  ),
+                                ),
                                 const SizedBox(height: 6),
                                 TextFormField(
                                   controller: _targetValueController,
@@ -456,7 +491,12 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Unit', style: AppTypography.bodyMedium),
+                                Text(
+                                  'Unit',
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                  ),
+                                ),
                                 const SizedBox(height: 6),
                                 TextFormField(
                                   controller: _targetUnitController,
@@ -472,7 +512,12 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                     ],
 
                     // Frequency
-                    Text('Frequency', style: AppTypography.titleMedium),
+                    Text(
+                      'Frequency',
+                      style: AppTypography.titleMedium.copyWith(
+                        color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -484,6 +529,12 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                             setState(() => _frequency = 'every_day');
                           },
                           selectedColor: AppColors.primaryEmerald,
+                          labelStyle: TextStyle(
+                            color: _frequency == 'every_day'
+                                ? Colors.white
+                                : (isDark ? AppColors.textLight : AppColors.textDarkNavy),
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         const SizedBox(width: 10),
                         ChoiceChip(
@@ -494,6 +545,12 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                             setState(() => _frequency = 'selected_weekdays');
                           },
                           selectedColor: AppColors.primaryEmerald,
+                          labelStyle: TextStyle(
+                            color: _frequency == 'selected_weekdays'
+                                ? Colors.white
+                                : (isDark ? AppColors.textLight : AppColors.textDarkNavy),
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
                     ),
@@ -502,13 +559,13 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _buildDayChip('M', 1),
-                          _buildDayChip('T', 2),
-                          _buildDayChip('W', 3),
-                          _buildDayChip('T', 4),
-                          _buildDayChip('F', 5),
-                          _buildDayChip('S', 6),
-                          _buildDayChip('S', 7),
+                          _buildDayChip('M', 1, isDark),
+                          _buildDayChip('T', 2, isDark),
+                          _buildDayChip('W', 3, isDark),
+                          _buildDayChip('T', 4, isDark),
+                          _buildDayChip('F', 5, isDark),
+                          _buildDayChip('S', 6, isDark),
+                          _buildDayChip('S', 7, isDark),
                         ],
                       ),
                     ],
@@ -517,14 +574,21 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                     // Reminders Section (Supports Specific Time OR Intervals 5, 10, 15, etc.)
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: Text('Habit Reminder', style: AppTypography.titleMedium),
+                      title: Text(
+                        'Habit Reminder',
+                        style: AppTypography.titleMedium.copyWith(
+                          color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                        ),
+                      ),
                       subtitle: Text(
                         _reminderEnabled
                             ? (_reminderType == 'specific_time'
                                 ? 'Daily notification at ${_reminderTime.format(context)}'
                                 : 'Repeats every $_reminderIntervalMinutes minutes')
                             : 'Disabled',
-                        style: AppTypography.bodySmall,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                        ),
                       ),
                       value: _reminderEnabled,
                       activeColor: AppColors.primaryEmerald,
@@ -547,6 +611,12 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                               setState(() => _reminderType = 'specific_time');
                             },
                             selectedColor: AppColors.primaryEmerald,
+                            labelStyle: TextStyle(
+                              color: _reminderType == 'specific_time'
+                                  ? Colors.white
+                                  : (isDark ? AppColors.textLight : AppColors.textDarkNavy),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           const SizedBox(width: 10),
                           ChoiceChip(
@@ -557,6 +627,12 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                               setState(() => _reminderType = 'interval');
                             },
                             selectedColor: AppColors.primaryEmerald,
+                            labelStyle: TextStyle(
+                              color: _reminderType == 'interval'
+                                  ? Colors.white
+                                  : (isDark ? AppColors.textLight : AppColors.textDarkNavy),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ),
@@ -576,9 +652,17 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                           },
                           icon: const Icon(Icons.access_time_rounded, color: AppColors.primaryEmerald),
                           label: Text('Set Time: ${_reminderTime.format(context)}'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: isDark ? AppColors.primaryGreenLight : AppColors.primaryEmerald,
+                          ),
                         ),
                       ] else ...[
-                        Text('Repeat Notification Interval:', style: AppTypography.bodySmall),
+                        Text(
+                          'Repeat Notification Interval:',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                          ),
+                        ),
                         const SizedBox(height: 8),
                         Wrap(
                           spacing: 8,
@@ -590,6 +674,12 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
                               label: Text(label),
                               selected: isSel,
                               selectedColor: AppColors.primaryEmerald,
+                              labelStyle: TextStyle(
+                                color: isSel
+                                    ? Colors.white
+                                    : (isDark ? AppColors.textLight : AppColors.textDarkNavy),
+                                fontWeight: FontWeight.w600,
+                              ),
                               onSelected: (_) {
                                 HapticFeedbackHelper.selection();
                                 setState(() => _reminderIntervalMinutes = mins);
@@ -684,7 +774,7 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
     );
   }
 
-  Widget _buildDayChip(String label, int dayIndex) {
+  Widget _buildDayChip(String label, int dayIndex, bool isDark) {
     final isSelected = _selectedWeekdays.contains(dayIndex);
     return GestureDetector(
       onTap: () {
@@ -705,14 +795,14 @@ class _AddEditHabitModalState extends ConsumerState<AddEditHabitModal> {
           color: isSelected ? AppColors.primaryEmerald : Colors.transparent,
           shape: BoxShape.circle,
           border: Border.all(
-            color: isSelected ? AppColors.primaryEmerald : AppColors.borderLight,
+            color: isSelected ? AppColors.primaryEmerald : (isDark ? AppColors.borderDark : AppColors.borderLight),
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            color: isSelected ? Colors.white : AppColors.textSecondary,
+            color: isSelected ? Colors.white : (isDark ? AppColors.textLight : AppColors.textSecondary),
           ),
         ),
       ),

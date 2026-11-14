@@ -79,7 +79,14 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
     if (_habit == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Habit Details')),
-        body: const Center(child: Text('Habit not found or was removed.')),
+        body: Center(
+          child: Text(
+            'Habit not found or was removed.',
+            style: TextStyle(
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+            ),
+          ),
+        ),
       );
     }
 
@@ -106,6 +113,14 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                 builder: (_) => AddEditHabitModal(habitToEdit: habit),
               );
               _loadHabitData();
+            },
+          ),
+          IconButton(
+            icon: Icon(habit.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined),
+            tooltip: habit.isArchived ? 'Unarchive Habit' : 'Archive Habit',
+            onPressed: () {
+              HapticFeedbackHelper.light();
+              _toggleArchive(habit);
             },
           ),
           IconButton(
@@ -182,11 +197,12 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                                   color: Colors.grey.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'Archived',
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
+                                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
                                   ),
                                 ),
                               ),
@@ -252,7 +268,12 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
             const SizedBox(height: 24),
 
             // 3. Description & Schedule Details
-            Text('Details', style: AppTypography.titleLarge),
+            Text(
+              'Details',
+              style: AppTypography.titleLarge.copyWith(
+                color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+              ),
+            ),
             const SizedBox(height: 12),
             CustomCard(
               padding: const EdgeInsets.all(16),
@@ -295,14 +316,24 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
             const SizedBox(height: 24),
 
             // 4. Last 14 Days History Grid
-            Text('Recent History (Last 14 Days)', style: AppTypography.titleLarge),
+            Text(
+              'Recent History (Last 14 Days)',
+              style: AppTypography.titleLarge.copyWith(
+                color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+              ),
+            ),
             const SizedBox(height: 12),
             CustomCard(
               padding: const EdgeInsets.all(16),
               borderRadius: 16,
               backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
               child: recentHistory.isEmpty
-                  ? const Text('No history recorded yet.')
+                  ? Text(
+                      'No history recorded yet.',
+                      style: TextStyle(
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                      ),
+                    )
                   : Wrap(
                       spacing: 8,
                       runSpacing: 8,

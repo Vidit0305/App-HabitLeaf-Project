@@ -219,6 +219,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildErrorState(BuildContext context, WidgetRef ref, String error) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -227,15 +228,19 @@ class HomeScreen extends ConsumerWidget {
           children: [
             const Icon(Icons.cloud_off_rounded, size: 54, color: AppColors.primaryEmerald),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               AppConstants.appName,
-              style: AppTypography.titleLarge,
+              style: AppTypography.titleLarge.copyWith(
+                color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Loading local habits and offline data...',
               textAlign: TextAlign.center,
-              style: AppTypography.bodyMedium,
+              style: AppTypography.bodyMedium.copyWith(
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(

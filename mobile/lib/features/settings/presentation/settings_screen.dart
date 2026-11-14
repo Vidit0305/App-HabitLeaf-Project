@@ -73,7 +73,12 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.refresh_rounded, size: 48, color: AppColors.primaryEmerald),
               const SizedBox(height: 12),
-              const Text('Tap to refresh settings', style: AppTypography.titleMedium),
+              Text(
+                'Tap to refresh settings',
+                style: AppTypography.titleMedium.copyWith(
+                  color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                ),
+              ),
               const SizedBox(height: 12),
               ElevatedButton.icon(
                 onPressed: () {
@@ -189,13 +194,24 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _showEditNameDialog(BuildContext context, WidgetRef ref, String currentName) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final controller = TextEditingController(text: currentName);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Edit Display Name'),
+        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+        title: Text(
+          'Edit Display Name',
+          style: TextStyle(
+            color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         content: TextField(
           controller: controller,
+          style: TextStyle(
+            color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+          ),
           decoration: const InputDecoration(
             labelText: 'Your Name',
             hintText: 'Enter your preferred name',
@@ -208,7 +224,12 @@ class SettingsScreen extends ConsumerWidget {
               HapticFeedbackHelper.light();
               Navigator.of(ctx).pop();
             },
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () {

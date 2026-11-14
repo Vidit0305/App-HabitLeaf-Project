@@ -168,7 +168,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
               },
               child: habitsState.when(
                 loading: () => _buildLoadingList(),
-                error: (e, _) => _buildErrorRetry(ref),
+                error: (e, _) => _buildErrorRetry(ref, isDark),
                 data: (habits) => _buildHabitsList(habits, isDark),
               ),
             ),
@@ -226,14 +226,19 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
     );
   }
 
-  Widget _buildErrorRetry(WidgetRef ref) {
+  Widget _buildErrorRetry(WidgetRef ref, bool isDark) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.refresh_rounded, size: 48, color: AppColors.primaryEmerald),
           const SizedBox(height: 12),
-          const Text('Tap to refresh habits', style: AppTypography.titleMedium),
+          Text(
+            'Tap to refresh habits',
+            style: AppTypography.titleMedium.copyWith(
+              color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+            ),
+          ),
           const SizedBox(height: 12),
           ElevatedButton.icon(
             onPressed: () {
