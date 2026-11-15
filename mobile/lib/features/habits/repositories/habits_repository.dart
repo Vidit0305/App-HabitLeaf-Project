@@ -337,4 +337,47 @@ class HabitsRepository {
       } catch (_) {}
     });
   }
+
+  Future<Set<String>> getCompletedDatesForHabit(String habitId) async {
+    final completions = <String>{};
+
+    // 1. Gather from local storage completions
+    final localComps = _getLocalCompletions();
+    for (final c in localComps) {
+      if (c['habitId'] == habitId) {
+        final status = c['status']?.toString();
+        final val = (c['completedValue'] as num?)?.toDouble() ?? 0.0;
+        if (status == 'completed' || val >= 1.0) {
+          final dk = c['dateKey']?.toString();
+          if (dk != null && dk.isNotEmpty) {
+            completions.add(dk);
+          }
+        }
+      }
+    }
+
+    // 2. Fetch from backend API if online
+    try {
+      final res = await apiClient.get(
+        ApiConstants.completions,
+        queryParameters: {'habitId': habitId},
+      );
+      if (res != null && res['data'] is List) {
+        for (final item in res['data']) {
+          if (item is Map) {
+            final status = item['status']?.toString();
+            final val = (item['completedValue'] as num?)?.toDouble() ?? 0.0;
+            if (status == 'completed' || val >= 1.0) {
+              final dk = item['dateKey']?.toString();
+              if (dk != null && dk.isNotEmpty) {
+                completions.add(dk);
+              }
+            }
+          }
+        }
+      }
+    } catch (_) {}
+
+    return completions;
+  }
 }

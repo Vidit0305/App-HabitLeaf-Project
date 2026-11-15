@@ -184,3 +184,10 @@ final archivedHabitsProvider = FutureProvider<List<HabitModel>>((ref) async {
   final repo = ref.watch(habitsRepositoryProvider);
   return repo.fetchHabits(isArchived: true);
 });
+
+// Completed dates for a specific habit across history
+final habitCompletedDatesProvider =
+    FutureProvider.family<Set<String>, String>((ref, habitId) async {
+  final repo = ref.watch(habitsRepositoryProvider);
+  return repo.getCompletedDatesForHabit(habitId);
+});
