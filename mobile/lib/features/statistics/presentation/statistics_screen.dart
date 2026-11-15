@@ -10,8 +10,11 @@ import '../../../../core/utils/icon_helper.dart';
 import '../../../../core/widgets/custom_card.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
 import '../../../../core/widgets/theme_toggle_button.dart';
+import '../../habits/controllers/habits_controller.dart';
+import '../../habits/models/habit_model.dart';
 import '../controllers/statistics_controller.dart';
 import '../models/statistics_model.dart';
+import 'habit_monthly_history_screen.dart';
 
 class StatisticsScreen extends ConsumerWidget {
   const StatisticsScreen({super.key});
@@ -22,6 +25,7 @@ class StatisticsScreen extends ConsumerWidget {
     final summaryAsync = ref.watch(statisticsSummaryProvider);
     final trendsAsync = ref.watch(trendsProvider);
     final heatmapAsync = ref.watch(calendarHeatmapProvider);
+    final habitsAsync = ref.watch(habitsProvider);
     final selectedTimeframe = ref.watch(selectedTimeframeProvider);
     final currentHeatmapDate = ref.watch(currentHeatmapDateProvider);
 
@@ -75,10 +79,12 @@ class StatisticsScreen extends ConsumerWidget {
         ],
       ),
       body: RefreshIndicator(
+        color: AppColors.primaryEmerald,
         onRefresh: () async {
           ref.invalidate(statisticsSummaryProvider);
           ref.invalidate(trendsProvider);
           ref.invalidate(calendarHeatmapProvider);
+          ref.invalidate(habitsProvider);
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(
@@ -122,7 +128,12 @@ class StatisticsScreen extends ConsumerWidget {
                   height: 140,
                   borderRadius: 18,
                 ),
-                error: (e, _) => Text('Error loading summary: $e'),
+                error: (e, _) => Text(
+                  'Error loading summary: $e',
+                  style: TextStyle(
+                    color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                  ),
+                ),
                 data: (summary) => _buildSummaryCards(summary, isDark),
               ),
               const SizedBox(height: 24),
@@ -134,7 +145,12 @@ class StatisticsScreen extends ConsumerWidget {
                   height: 240,
                   borderRadius: 20,
                 ),
-                error: (e, _) => Text('Error loading charts: $e'),
+                error: (e, _) => Text(
+                  'Error loading charts: $e',
+                  style: TextStyle(
+                    color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                  ),
+                ),
                 data: (trends) => _buildTrendCharts(context, trends, selectedTimeframe, isDark),
               ),
               const SizedBox(height: 28),
@@ -143,12 +159,17 @@ class StatisticsScreen extends ConsumerWidget {
               _buildHeatmapSection(context, ref, heatmapAsync, currentHeatmapDate, isDark),
               const SizedBox(height: 28),
 
-              // 5. Habit Comparison List
+              // 5. All Created Habits (Clickable to open HabitMonthlyHistoryScreen)
+              _buildAllHabitsSection(context, habitsAsync, isDark),
+              const SizedBox(height: 28),
+
+              // 6. Habit Performance Comparison
               trendsAsync.maybeWhen(
                 data: (trends) {
                   final list = trends['habitComparison'] as List<HabitComparisonItem>? ?? [];
                   if (list.isEmpty) return const SizedBox.shrink();
-                  return _buildHabitComparisonSection(list, isDark);
+                  final allHabits = habitsAsync.valueOrNull ?? [];
+                  return _buildHabitComparisonSection(context, list, allHabits, isDark);
                 },
                 orElse: () => const SizedBox.shrink(),
               ),
@@ -314,7 +335,12 @@ class StatisticsScreen extends ConsumerWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Daily Completion (Last 7 Days)', style: AppTypography.titleLarge),
+          Text(
+            'Daily Completion (Last 7 Days)',
+            style: AppTypography.titleLarge.copyWith(
+              color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+            ),
+          ),
           const SizedBox(height: 12),
           CustomCard(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
@@ -421,7 +447,12 @@ class StatisticsScreen extends ConsumerWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Consistency Trend Over Time', style: AppTypography.titleLarge),
+          Text(
+            'Consistency Trend Over Time',
+            style: AppTypography.titleLarge.copyWith(
+              color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+            ),
+          ),
           const SizedBox(height: 12),
           CustomCard(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
@@ -469,7 +500,10 @@ class StatisticsScreen extends ConsumerWidget {
                               padding: const EdgeInsets.only(top: 6),
                               child: Text(
                                 weeklyTrends[idx].weekLabel,
-                                style: const TextStyle(fontSize: 10),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                ),
                               ),
                             );
                           }
@@ -516,12 +550,20 @@ class StatisticsScreen extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Consistency Heatmap', style: AppTypography.titleLarge),
+            Text(
+              'Consistency Heatmap',
+              style: AppTypography.titleLarge.copyWith(
+                color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+              ),
+            ),
             // Month Navigation
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.chevron_left_rounded),
+                  icon: Icon(
+                    Icons.chevron_left_rounded,
+                    color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                  ),
                   onPressed: () {
                     ref.read(currentHeatmapDateProvider.notifier).state =
                         DateTime(currentMonthDate.year, currentMonthDate.month - 1, 1);
@@ -535,7 +577,10 @@ class StatisticsScreen extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.chevron_right_rounded),
+                  icon: Icon(
+                    Icons.chevron_right_rounded,
+                    color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                  ),
                   onPressed: () {
                     ref.read(currentHeatmapDateProvider.notifier).state =
                         DateTime(currentMonthDate.year, currentMonthDate.month + 1, 1);
@@ -580,7 +625,12 @@ class StatisticsScreen extends ConsumerWidget {
                   padding: EdgeInsets.all(24),
                   child: Center(child: CircularProgressIndicator()),
                 ),
-                error: (e, _) => Text('Error loading heatmap: $e'),
+                error: (e, _) => Text(
+                  'Error loading heatmap: $e',
+                  style: TextStyle(
+                    color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                  ),
+                ),
                 data: (days) => _buildHeatmapGrid(context, days, isDark),
               ),
               const SizedBox(height: 14),
@@ -588,13 +638,13 @@ class StatisticsScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildLegendItem('Unscheduled', isDark ? Colors.white10 : Colors.black12),
+                  _buildLegendItem('Unscheduled', isDark ? Colors.white10 : Colors.black12, isDark),
                   const SizedBox(width: 8),
-                  _buildLegendItem('0%', isDark ? AppColors.surfaceDarkElevated : const Color(0xFFFEE2E2)),
+                  _buildLegendItem('0%', isDark ? AppColors.surfaceDarkElevated : const Color(0xFFFEE2E2), isDark),
                   const SizedBox(width: 8),
-                  _buildLegendItem('Partial', AppColors.streakOrange),
+                  _buildLegendItem('Partial', AppColors.streakOrange, isDark),
                   const SizedBox(width: 8),
-                  _buildLegendItem('100%', AppColors.successGreen),
+                  _buildLegendItem('100%', AppColors.successGreen, isDark),
                 ],
               ),
             ],
@@ -677,7 +727,7 @@ class StatisticsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildLegendItem(String label, Color color) {
+  Widget _buildLegendItem(String label, Color color, bool isDark) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -690,7 +740,13 @@ class StatisticsScreen extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+          ),
+        ),
       ],
     );
   }
@@ -716,7 +772,10 @@ class StatisticsScreen extends ConsumerWidget {
                 children: [
                   Text(
                     item.dateKey,
-                    style: AppTypography.displayMedium.copyWith(fontSize: 18),
+                    style: AppTypography.displayMedium.copyWith(
+                      fontSize: 18,
+                      color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                    ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -741,9 +800,14 @@ class StatisticsScreen extends ConsumerWidget {
               ),
               const Divider(height: 24),
               if (item.habits.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Text('No habits were scheduled on this date.'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    'No habits were scheduled on this date.',
+                    style: TextStyle(
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                    ),
+                  ),
                 )
               else
                 ListView.builder(
@@ -763,6 +827,7 @@ class StatisticsScreen extends ConsumerWidget {
                         h['name'] ?? '',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
+                          color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
                           decoration: isDone ? TextDecoration.lineThrough : null,
                         ),
                       ),
@@ -783,11 +848,227 @@ class StatisticsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHabitComparisonSection(List<HabitComparisonItem> list, bool isDark) {
+  // 5. Dedicated All Created Habits Section
+  Widget _buildAllHabitsSection(
+    BuildContext context,
+    AsyncValue<List<HabitModel>> habitsAsync,
+    bool isDark,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Habit Performance Comparison', style: AppTypography.titleLarge),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'All Created Habits',
+              style: AppTypography.titleLarge.copyWith(
+                color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            Text(
+              'Tap for month history',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: isDark ? AppColors.primaryGreenLight : AppColors.primaryGreenAccent,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Select any habit to inspect its complete month-by-month calendar from inception.',
+          style: TextStyle(
+            fontSize: 12,
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 12),
+        habitsAsync.when(
+          loading: () => const SkeletonLoader(
+            width: double.infinity,
+            height: 90,
+            borderRadius: 16,
+          ),
+          error: (e, _) => Text(
+            'Error loading habits: $e',
+            style: TextStyle(
+              color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+            ),
+          ),
+          data: (habits) {
+            final activeHabits = habits.where((h) => !h.isArchived).toList();
+            if (activeHabits.isEmpty) {
+              return CustomCard(
+                padding: const EdgeInsets.all(20),
+                borderRadius: 16,
+                backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+                child: Center(
+                  child: Text(
+                    'No habits created yet. Create a habit to start tracking monthly history.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return Column(
+              children: activeHabits.map((habit) {
+                final habitColor = IconHelper.parseColor(habit.color);
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () {
+                        HapticFeedbackHelper.light();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => HabitMonthlyHistoryScreen(habit: habit),
+                          ),
+                        );
+                      },
+                      child: CustomCard(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        borderRadius: 16,
+                        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: habitColor.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                IconHelper.getIcon(habit.icon),
+                                color: habitColor,
+                                size: 22,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    habit.name,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: habitColor.withOpacity(0.12),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          habit.category,
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                            color: habitColor,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'From ${DateFormatter.formatShortDate(habit.startDate)}',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (habit.currentStreak > 0) ...[
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryGreenSoft.withOpacity(isDark ? 0.2 : 0.6),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.local_fire_department_rounded,
+                                      color: AppColors.primaryGreenAccent,
+                                      size: 13,
+                                    ),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      '${habit.currentStreak} d',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.primaryGreenAccent,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                            Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 14,
+                              color: isDark ? AppColors.primaryGreenLight : AppColors.primaryGreenAccent,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  // 6. Habit Performance Comparison
+  Widget _buildHabitComparisonSection(
+    BuildContext context,
+    List<HabitComparisonItem> list,
+    List<HabitModel> allHabits,
+    bool isDark,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Habit Performance Comparison',
+              style: AppTypography.titleLarge.copyWith(
+                color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 12),
         CustomCard(
           padding: const EdgeInsets.all(16),
@@ -796,45 +1077,83 @@ class StatisticsScreen extends ConsumerWidget {
           child: Column(
             children: list.map((item) {
               final color = IconHelper.parseColor(item.color);
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              return Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () {
+                    HapticFeedbackHelper.light();
+                    final habit = allHabits.firstWhere(
+                      (h) => h.id == item.habitId,
+                      orElse: () => HabitModel(
+                        id: item.habitId,
+                        name: item.name,
+                        color: item.color,
+                        icon: item.icon,
+                        startDate: DateTime.now().subtract(const Duration(days: 30)),
+                      ),
+                    );
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => HabitMonthlyHistoryScreen(habit: habit),
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(IconHelper.getIcon(item.icon), color: color, size: 16),
-                            const SizedBox(width: 6),
-                            Text(
-                              item.name,
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            Row(
+                              children: [
+                                Icon(IconHelper.getIcon(item.icon), color: color, size: 16),
+                                const SizedBox(width: 6),
+                                Text(
+                                  item.name,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? AppColors.textLight : AppColors.textDarkNavy,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  '${item.percentage}% (${item.completedCount}/${item.scheduledCount})',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: color,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 16,
+                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                        Text(
-                          '${item.percentage}% (${item.completedCount}/${item.scheduledCount})',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: color,
+                        const SizedBox(height: 6),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: item.percentage / 100.0,
+                            backgroundColor: isDark ? AppColors.surfaceDarkElevated : AppColors.softBlueBackground,
+                            valueColor: AlwaysStoppedAnimation<Color>(color),
+                            minHeight: 6,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: item.percentage / 100.0,
-                        backgroundColor: isDark ? AppColors.surfaceDarkElevated : AppColors.softBlueBackground,
-                        valueColor: AlwaysStoppedAnimation<Color>(color),
-                        minHeight: 6,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               );
             }).toList(),
