@@ -1029,10 +1029,31 @@ class StatisticsScreen extends ConsumerWidget {
                               ),
                               const SizedBox(width: 8),
                             ],
-                            Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              size: 14,
-                              color: isDark ? AppColors.primaryGreenLight : AppColors.primaryGreenAccent,
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: (isDark ? AppColors.primaryEmerald : AppColors.primaryGreenAccent).withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'History',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark ? AppColors.primaryGreenLight : AppColors.primaryGreenAccent,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 11,
+                                    color: isDark ? AppColors.primaryGreenLight : AppColors.primaryGreenAccent,
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
