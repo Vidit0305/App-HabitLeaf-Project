@@ -341,14 +341,16 @@ class HabitsRepository {
   Future<Set<String>> getCompletedDatesForHabit(String habitId) async {
     final completions = <String>{};
 
-    // 1. Gather from local storage completions
+    // 1. Gather from local storage completions with robust key normalization
     final localComps = _getLocalCompletions();
     for (final c in localComps) {
       if (c['habitId'] == habitId) {
         final status = c['status']?.toString();
         final val = (c['completedValue'] as num?)?.toDouble() ?? 0.0;
         if (status == 'completed' || val >= 1.0) {
-          final dk = c['dateKey']?.toString();
+          final dk = DateFormatter.normalizeDateKey(
+            c['dateKey'] ?? c['completedDate'] ?? c['date'] ?? c['completedAt'],
+          );
           if (dk != null && dk.isNotEmpty) {
             completions.add(dk);
           }
@@ -356,7 +358,16 @@ class HabitsRepository {
       }
     }
 
-    // 2. Fetch from backend API if online
+    // 2. Include today's completion if habit is marked completed in local state
+    final allHabits = _getLocalHabits();
+    for (final h in allHabits) {
+      if (h.id == habitId && h.isCompletedToday) {
+        completions.add(DateFormatter.toDateKey(DateTime.now()));
+        break;
+      }
+    }
+
+    // 3. Fetch from backend API if online
     try {
       final res = await apiClient.get(
         ApiConstants.completions,
@@ -368,7 +379,9 @@ class HabitsRepository {
             final status = item['status']?.toString();
             final val = (item['completedValue'] as num?)?.toDouble() ?? 0.0;
             if (status == 'completed' || val >= 1.0) {
-              final dk = item['dateKey']?.toString();
+              final dk = DateFormatter.normalizeDateKey(
+                item['dateKey'] ?? item['completedDate'] ?? item['date'] ?? item['completedAt'],
+              );
               if (dk != null && dk.isNotEmpty) {
                 completions.add(dk);
               }
