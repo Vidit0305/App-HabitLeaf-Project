@@ -59,4 +59,21 @@ class DateFormatter {
   static bool isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
+
+  /// Standardizes any dynamic date value (ISO 8601 string, DateTime, or dateKey) into standard 'yyyy-MM-dd' format.
+  static String? normalizeDateKey(dynamic rawDate) {
+    if (rawDate == null) return null;
+    if (rawDate is DateTime) return toDateKey(rawDate);
+    final str = rawDate.toString().trim();
+    if (str.isEmpty) return null;
+    if (str.length >= 10 && RegExp(r'^\d{4}-\d{2}-\d{2}').hasMatch(str)) {
+      return str.substring(0, 10);
+    }
+    try {
+      final parsed = DateTime.parse(str);
+      return toDateKey(parsed);
+    } catch (_) {
+      return null;
+    }
+  }
 }
