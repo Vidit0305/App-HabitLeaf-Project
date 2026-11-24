@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/app_providers.dart';
+import '../../habits/controllers/habits_controller.dart';
 import '../models/statistics_model.dart';
 
 // Timeframe selector
@@ -11,7 +12,8 @@ final currentHeatmapDateProvider = StateProvider<DateTime>((ref) => DateTime.now
 // Summary metrics provider
 final statisticsSummaryProvider = FutureProvider<StatisticsSummary>((ref) async {
   final repo = ref.watch(statisticsRepositoryProvider);
-  return repo.fetchSummary();
+  final todayKey = ref.watch(todayDateKeyProvider);
+  return repo.fetchSummary(dateKey: todayKey);
 });
 
 // Trends provider

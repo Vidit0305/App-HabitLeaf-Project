@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/haptic_feedback_helper.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -26,6 +27,7 @@ class HomeScreen extends ConsumerWidget {
     final habitsState = ref.watch(habitsProvider);
     final settingsState = ref.watch(settingsProvider);
     final summaryState = ref.watch(statisticsSummaryProvider);
+    ref.watch(todayDateKeyProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final displayName = settingsState.maybeWhen(
@@ -38,6 +40,8 @@ class HomeScreen extends ConsumerWidget {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
+            final currentKey = DateFormatter.toDateKey(DateTime.now());
+            ref.read(todayDateKeyProvider.notifier).state = currentKey;
             await ref.read(habitsProvider.notifier).loadHabits();
             ref.invalidate(statisticsSummaryProvider);
           },

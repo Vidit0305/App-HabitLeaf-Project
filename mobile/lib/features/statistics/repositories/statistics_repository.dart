@@ -5,6 +5,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/streak_calculator.dart';
 import '../../habits/models/habit_model.dart';
 import '../models/statistics_model.dart';
 
@@ -13,12 +14,57 @@ class StatisticsRepository {
 
   StatisticsRepository({required this.apiClient});
 
-  List<HabitModel> _getLocalHabits() {
+  List<HabitModel> _getLocalHabits([String? targetDateKey]) {
     final cached = LocalStorage.getString(AppConstants.keyCachedHabits);
     if (cached == null || cached.trim().isEmpty) return [];
     try {
       final decoded = jsonDecode(cached) as List;
-      return decoded.map((e) => HabitModel.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+      final todayKey = targetDateKey ?? DateFormatter.toDateKey(DateTime.now());
+      final completions = _getLocalCompletions();
+
+      final Map<String, Map<String, Map<String, dynamic>>> compsByHabit = {};
+      for (final c in completions) {
+        final hId = c['habitId']?.toString() ?? '';
+        final rawKey = c['dateKey'] ?? c['date'] ?? c['completedDate'];
+        final normKey = DateFormatter.normalizeDateKey(rawKey);
+        if (hId.isNotEmpty && normKey != null) {
+          compsByHabit.putIfAbsent(hId, () => {})[normKey] = c;
+        }
+      }
+
+      return decoded.map((e) {
+        final map = Map<String, dynamic>.from(e as Map);
+        final habitId = map['_id']?.toString() ?? map['id']?.toString() ?? '';
+        final habitComps = compsByHabit[habitId] ?? {};
+        final todayComp = habitComps[todayKey];
+        final targetVal = (map['targetValue'] as num?)?.toDouble() ?? 1.0;
+        final isMeasurable = map['habitType'] == 'measurable';
+
+        bool isDoneToday = false;
+        double todayVal = 0.0;
+        if (todayComp != null) {
+          final compVal = (todayComp['completedValue'] as num?)?.toDouble() ?? 0.0;
+          final status = todayComp['status']?.toString();
+          if (status == 'completed' || (isMeasurable ? compVal >= targetVal : compVal >= 1.0)) {
+            isDoneToday = true;
+            todayVal = compVal > 0 ? compVal : targetVal;
+          }
+        }
+
+        map['isCompletedToday'] = isDoneToday;
+        map['todayCompletedValue'] = todayVal;
+
+        final baseHabit = HabitModel.fromJson(map);
+        final streakRes = StreakCalculator.calculateHabitStreak(baseHabit, habitComps);
+        return baseHabit.copyWith(
+          isCompletedToday: isDoneToday,
+          todayCompletedValue: todayVal,
+          currentStreak: streakRes.currentStreak,
+          longestStreak: streakRes.longestStreak > baseHabit.longestStreak
+              ? streakRes.longestStreak
+              : baseHabit.longestStreak,
+        );
+      }).toList();
     } catch (_) {
       return [];
     }
@@ -45,12 +91,12 @@ class StatisticsRepository {
       } catch (_) {}
     });
 
-    // Compute locally
-    final habits = _getLocalHabits().where((h) => !h.isArchived).toList();
-    final completions = _getLocalCompletions();
+    // Compute locally with dateKey awareness
     final today = DateTime.now();
     final todayKey = dateKey ?? DateFormatter.toDateKey(today);
-    final todayWeekday = today.weekday;
+    final todayWeekday = DateFormatter.fromDateKey(todayKey).weekday;
+    final habits = _getLocalHabits(todayKey).where((h) => !h.isArchived).toList();
+    final completions = _getLocalCompletions();
 
     final todayScheduled = habits.where((h) {
       if (h.frequency == 'every_day') return true;
@@ -59,10 +105,7 @@ class StatisticsRepository {
 
     int completedCount = 0;
     for (final h in todayScheduled) {
-      final hasComp = completions.any(
-        (c) => c['habitId'] == h.id && c['dateKey'] == todayKey && c['status'] == 'completed',
-      );
-      if (hasComp || h.isCompletedToday) {
+      if (h.isCompletedToday) {
         completedCount++;
       }
     }

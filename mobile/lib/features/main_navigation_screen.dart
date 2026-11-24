@@ -1,12 +1,16 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme/app_colors.dart';
+import '../../core/utils/date_formatter.dart';
 import '../../core/utils/haptic_feedback_helper.dart';
 import 'home/presentation/home_screen.dart';
+import 'habits/controllers/habits_controller.dart';
 import 'habits/presentation/habits_screen.dart';
 import 'habits/presentation/add_edit_habit_modal.dart';
 import 'notifications/presentation/notifications_screen.dart';
 import 'notifications/controllers/notifications_controller.dart';
+import 'statistics/controllers/statistics_controller.dart';
 import 'statistics/presentation/statistics_screen.dart';
 
 class MainNavigationScreen extends ConsumerStatefulWidget {
@@ -16,8 +20,65 @@ class MainNavigationScreen extends ConsumerStatefulWidget {
   ConsumerState<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
+class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen>
+    with WidgetsBindingObserver {
   int _currentIndex = 0;
+  Timer? _midnightTimer;
+  String _lastDateKey = '';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _lastDateKey = DateFormatter.toDateKey(DateTime.now());
+    _scheduleMidnightTimer();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _midnightTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkDayRollover();
+    }
+  }
+
+  void _scheduleMidnightTimer() {
+    _midnightTimer?.cancel();
+    final now = DateTime.now();
+    // Schedule for 12:00:01 AM tomorrow morning
+    final tomorrowMidnight = DateTime(now.year, now.month, now.day + 1, 0, 0, 1);
+    final duration = tomorrowMidnight.difference(now);
+
+    _midnightTimer = Timer(duration, () {
+      _checkDayRollover();
+      _scheduleMidnightTimer();
+    });
+  }
+
+  void _checkDayRollover() {
+    final currentDateKey = DateFormatter.toDateKey(DateTime.now());
+    if (currentDateKey != _lastDateKey) {
+      _lastDateKey = currentDateKey;
+      // 1. Update the date provider to trigger active UI rebuilds across all tabs
+      ref.read(todayDateKeyProvider.notifier).state = currentDateKey;
+      // 2. Reload habits so today's completion status resets to false while history is preserved
+      ref.read(habitsProvider.notifier).loadHabits();
+      // 3. Invalidate statistics so summary metrics reflect the new day
+      ref.invalidate(statisticsSummaryProvider);
+      ref.invalidate(trendsProvider);
+      ref.invalidate(calendarHeatmapProvider);
+      ref.invalidate(notificationsProvider);
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
 
   void _onTabSelected(int index) {
     if (_currentIndex != index) {

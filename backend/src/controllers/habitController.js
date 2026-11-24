@@ -12,7 +12,7 @@ async function getHabits(req, res, next) {
 
 async function getHabitById(req, res, next) {
   try {
-    const habit = await habitService.getHabitById(req.installationId, req.params.id);
+    const habit = await habitService.getHabitById(req.installationId, req.params.id, req.query.date);
     if (!habit) {
       return errorResponse(res, 'Habit not found', 404);
     }

@@ -5,6 +5,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/streak_calculator.dart';
 import '../models/habit_model.dart';
 
 class HabitsRepository {
@@ -12,7 +13,7 @@ class HabitsRepository {
 
   HabitsRepository({required this.apiClient});
 
-  // Load all habits locally from storage
+  // Load all habits locally from storage with automatic midnight reset and streak recalculation
   List<HabitModel> _getLocalHabits() {
     final cached = LocalStorage.getString(AppConstants.keyCachedHabits);
     if (cached == null || cached.trim().isEmpty) return [];
@@ -21,22 +22,64 @@ class HabitsRepository {
       final todayKey = DateFormatter.toDateKey(DateTime.now());
       final completions = _getLocalCompletions();
 
+      // Group completions by habitId and normalized dateKey
+      final Map<String, Map<String, Map<String, dynamic>>> compsByHabit = {};
+      for (final c in completions) {
+        final hId = c['habitId']?.toString() ?? '';
+        final rawKey = c['dateKey'] ?? c['date'] ?? c['completedDate'];
+        final normKey = DateFormatter.normalizeDateKey(rawKey);
+        if (hId.isNotEmpty && normKey != null) {
+          compsByHabit.putIfAbsent(hId, () => {})[normKey] = c;
+        }
+      }
+
       return decoded.map((item) {
         final map = Map<String, dynamic>.from(item as Map);
         final habitId = map['_id']?.toString() ?? map['id']?.toString() ?? '';
+        final habitComps = compsByHabit[habitId] ?? {};
 
-        // Check if there is a completion recorded for today
-        final todayComp = completions.firstWhere(
-          (c) => c['habitId'] == habitId && c['dateKey'] == todayKey,
-          orElse: () => {},
-        );
+        // Check if there is a valid completion recorded for today
+        final todayComp = habitComps[todayKey];
+        final targetVal = (map['targetValue'] as num?)?.toDouble() ?? 1.0;
+        final isMeasurable = map['habitType'] == 'measurable';
 
-        if (todayComp.isNotEmpty) {
-          map['isCompletedToday'] = true;
-          map['todayCompletedValue'] = (todayComp['completedValue'] as num?)?.toDouble() ?? 1.0;
+        bool isDoneToday = false;
+        double todayVal = 0.0;
+
+        if (todayComp != null) {
+          final compVal = (todayComp['completedValue'] as num?)?.toDouble() ?? 0.0;
+          final status = todayComp['status']?.toString();
+          final isCompleted = status == 'completed' ||
+              (isMeasurable ? compVal >= targetVal : compVal >= 1.0);
+          if (isCompleted) {
+            isDoneToday = true;
+            todayVal = compVal > 0 ? compVal : targetVal;
+          } else {
+            isDoneToday = false;
+            todayVal = compVal;
+          }
+        } else {
+          // At 12 AM midnight, a new day has started: daily completion resets to uncompleted
+          isDoneToday = false;
+          todayVal = 0.0;
         }
 
-        return HabitModel.fromJson(map);
+        map['isCompletedToday'] = isDoneToday;
+        map['todayCompletedValue'] = todayVal;
+
+        final baseHabit = HabitModel.fromJson(map);
+
+        // Dynamically compute active streak and historical longest streak
+        final streakRes = StreakCalculator.calculateHabitStreak(baseHabit, habitComps);
+
+        return baseHabit.copyWith(
+          isCompletedToday: isDoneToday,
+          todayCompletedValue: todayVal,
+          currentStreak: streakRes.currentStreak,
+          longestStreak: streakRes.longestStreak > baseHabit.longestStreak
+              ? streakRes.longestStreak
+              : baseHabit.longestStreak,
+        );
       }).toList();
     } catch (_) {
       return [];
@@ -68,12 +111,15 @@ class HabitsRepository {
     String? category,
     String? search,
   }) async {
+    final todayKey = DateFormatter.toDateKey(DateTime.now());
+
     // 1. Try fetching from live MongoDB backend first
     try {
       final query = <String, dynamic>{};
       if (isArchived != null) query['isArchived'] = isArchived.toString();
       if (category != null && category != 'All') query['category'] = category;
       if (search != null && search.isNotEmpty) query['search'] = search;
+      query['date'] = todayKey;
 
       final res = await apiClient.get(ApiConstants.habits, queryParameters: query);
       if (res != null && res['data'] is List) {
@@ -255,12 +301,16 @@ class HabitsRepository {
     required double completedValue,
     String? notes,
   }) async {
-    // 1. Save completion locally
+    final normKey = DateFormatter.normalizeDateKey(dateKey) ?? dateKey;
+
+    // 1. Save completion locally with normalized dateKey
     final comps = _getLocalCompletions();
-    comps.removeWhere((c) => c['habitId'] == habitId && c['dateKey'] == dateKey);
+    comps.removeWhere((c) =>
+        c['habitId'] == habitId &&
+        DateFormatter.normalizeDateKey(c['dateKey'] ?? c['date']) == normKey);
     comps.add({
       'habitId': habitId,
-      'dateKey': dateKey,
+      'dateKey': normKey,
       'status': 'completed',
       'completedValue': completedValue,
       'notes': notes ?? '',
@@ -268,21 +318,9 @@ class HabitsRepository {
     });
     await _saveLocalCompletions(comps);
 
-    // 2. Update habit streak and status
-    final list = _getLocalHabits();
-    final index = list.indexWhere((h) => h.id == habitId);
-    if (index != -1) {
-      final h = list[index];
-      final newStreak = h.currentStreak + 1;
-      final newLongest = newStreak > h.longestStreak ? newStreak : h.longestStreak;
-      list[index] = h.copyWith(
-        isCompletedToday: true,
-        todayCompletedValue: completedValue,
-        currentStreak: newStreak,
-        longestStreak: newLongest,
-      );
-      await _saveLocalHabits(list);
-    }
+    // 2. Re-compute habits dynamically and persist updated local cache
+    final updatedList = _getLocalHabits();
+    await _saveLocalHabits(updatedList);
 
     // 3. Background sync
     Future(() async {
@@ -291,7 +329,7 @@ class HabitsRepository {
           ApiConstants.completions,
           data: {
             'habitId': habitId,
-            'dateKey': dateKey,
+            'dateKey': normKey,
             'status': 'completed',
             'completedValue': completedValue,
             'notes': notes ?? '',
@@ -305,24 +343,18 @@ class HabitsRepository {
     required String habitId,
     required String dateKey,
   }) async {
+    final normKey = DateFormatter.normalizeDateKey(dateKey) ?? dateKey;
+
     // 1. Remove completion locally
     final comps = _getLocalCompletions();
-    comps.removeWhere((c) => c['habitId'] == habitId && c['dateKey'] == dateKey);
+    comps.removeWhere((c) =>
+        c['habitId'] == habitId &&
+        DateFormatter.normalizeDateKey(c['dateKey'] ?? c['date']) == normKey);
     await _saveLocalCompletions(comps);
 
-    // 2. Update habit streak and status
-    final list = _getLocalHabits();
-    final index = list.indexWhere((h) => h.id == habitId);
-    if (index != -1) {
-      final h = list[index];
-      final newStreak = h.currentStreak > 0 ? h.currentStreak - 1 : 0;
-      list[index] = h.copyWith(
-        isCompletedToday: false,
-        todayCompletedValue: 0.0,
-        currentStreak: newStreak,
-      );
-      await _saveLocalHabits(list);
-    }
+    // 2. Re-compute habits dynamically and persist updated local cache
+    final updatedList = _getLocalHabits();
+    await _saveLocalHabits(updatedList);
 
     // 3. Background sync
     Future(() async {
@@ -331,7 +363,7 @@ class HabitsRepository {
           ApiConstants.completionsUndo,
           data: {
             'habitId': habitId,
-            'dateKey': dateKey,
+            'dateKey': normKey,
           },
         );
       } catch (_) {}

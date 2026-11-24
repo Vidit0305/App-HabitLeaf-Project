@@ -10,6 +10,11 @@ import '../../notifications/controllers/notifications_controller.dart';
 final selectedCategoryProvider = StateProvider<String>((ref) => 'All');
 final habitSearchQueryProvider = StateProvider<String>((ref) => '');
 
+// Current active calendar day key (triggers midnight habit reset & day rollover)
+final todayDateKeyProvider = StateProvider<String>((ref) {
+  return DateFormatter.toDateKey(DateTime.now());
+});
+
 // Habits State
 class HabitsNotifier extends StateNotifier<AsyncValue<List<HabitModel>>> {
   final HabitsRepository repository;
@@ -127,6 +132,8 @@ class HabitsNotifier extends StateNotifier<AsyncValue<List<HabitModel>>> {
               dateKey: todayKey,
             );
           }
+          final refreshed = await repository.fetchHabits(isArchived: false);
+          state = AsyncValue.data(refreshed);
           ref.invalidate(statisticsSummaryProvider);
           ref.invalidate(trendsProvider);
           ref.invalidate(notificationsProvider);
@@ -163,6 +170,8 @@ class HabitsNotifier extends StateNotifier<AsyncValue<List<HabitModel>>> {
             dateKey: todayKey,
             completedValue: newValue,
           );
+          final refreshed = await repository.fetchHabits(isArchived: false);
+          state = AsyncValue.data(refreshed);
           ref.invalidate(statisticsSummaryProvider);
           ref.invalidate(trendsProvider);
         } catch (_) {
@@ -176,6 +185,7 @@ class HabitsNotifier extends StateNotifier<AsyncValue<List<HabitModel>>> {
 final habitsProvider =
     StateNotifierProvider<HabitsNotifier, AsyncValue<List<HabitModel>>>((ref) {
   final repo = ref.watch(habitsRepositoryProvider);
+  ref.watch(todayDateKeyProvider);
   return HabitsNotifier(repository: repo, ref: ref);
 });
 

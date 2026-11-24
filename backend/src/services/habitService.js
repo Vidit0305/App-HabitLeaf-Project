@@ -19,7 +19,7 @@ async function getHabits(installationId, filter = {}) {
   const habits = await Habit.find(query).sort({ createdAt: -1 });
 
   // Attach streaks and today's status to habits
-  const todayKey = formatDateKey(new Date());
+  const todayKey = filter.date ? formatDateKey(filter.date) : formatDateKey(new Date());
   const habitIds = habits.map((h) => h._id);
   const completions = await HabitCompletion.find({
     installationId,
@@ -58,11 +58,11 @@ async function getHabits(installationId, filter = {}) {
   return habitsWithStats;
 }
 
-async function getHabitById(installationId, habitId) {
+async function getHabitById(installationId, habitId, dateParam) {
   const habit = await Habit.findOne({ _id: habitId, installationId });
   if (!habit) return null;
 
-  const todayKey = formatDateKey(new Date());
+  const todayKey = dateParam ? formatDateKey(dateParam) : formatDateKey(new Date());
   const completions = await HabitCompletion.find({ installationId, habitId }).sort({ dateKey: -1 });
   const map = new Map();
   for (const c of completions) {
